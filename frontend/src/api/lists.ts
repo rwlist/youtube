@@ -8,6 +8,8 @@ import {
   watch,
   ref,
   Ref,
+  computed,
+  watchEffect,
 } from 'vue'
 import { API } from './api'
 import createAsyncProcess from '../utils/create-async-process'
@@ -32,17 +34,26 @@ export interface ListCtl {
 
 export class MetaList implements ListCtl {
   private items: UnwrapNestedRefs<ListItem[]> = reactive([])
-  private status: UnwrapNestedRefs<ListStatus> = reactive({
-    header: 'Status: META',
+  private status = ref('META')
+  private display: UnwrapNestedRefs<ListStatus> = reactive({
+    header: '',
     response: 'Enter a query and press enter.',
   })
+
+  constructor() {
+    watch(
+      () => 'Status: ' + this.status.value,
+      header => this.display.header = header,
+      { immediate: true },
+    )
+  }
 
   allItemsRef(): DeepReadonly<UnwrapNestedRefs<ListItem[]>> {
     return readonly(this.items)
   }
 
   statusRef(): DeepReadonly<UnwrapNestedRefs<ListStatus>> {
-    return readonly(this.status)
+    return readonly(this.display)
   }
 
   executeQuery(query: string): void {
@@ -52,17 +63,33 @@ export class MetaList implements ListCtl {
       case '$help':
         this.queryHelp()
         break
-      // TODO: implement other queries, like $login.
+      case '$login':
+        this.queryLogin()
+        break
       default:
         this.queryHelp()
     }
   }
 
-  private queryHelp(): void {
-    this.status.response = `
-            $help: show this help
-            $login: login
-        `
+  private queryHelp() {
+    this.status.value = 'HELP'
+    this.display.response = 
+`$help: show this help
+$login: login`
+  }
+
+  private async queryLogin() {
+    this.status.value = 'FETCHING'
+
+    try {
+      const res = await api.login({})
+      this.status.value = 'LOGIN'
+      document.location.href = res.RedirectURL
+      // unreachable
+    } catch (err) {
+      this.status.value = 'ERROR'
+      this.display.response = `Error: ${err.message}`
+    }
   }
 }
 

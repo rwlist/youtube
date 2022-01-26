@@ -15,7 +15,7 @@ export function useListCtl(listID: Ref<string>) {
     () => listID.value,
     async (newListID) => {
       status.value = {
-        header: '',
+        header: 'Loading list...',
         response: '',
       }
       allItems.value = []
@@ -29,6 +29,7 @@ export function useListCtl(listID: Ref<string>) {
       status.value = listCtl.statusRef()
       allItems.value = listCtl.allItemsRef()
     },
+    { immediate: true },
   )
 
   const query = ref('')

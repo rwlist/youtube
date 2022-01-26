@@ -1,6 +1,7 @@
 package rpc
 
 import (
+	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
@@ -27,10 +28,12 @@ func OAuthHandler(oauthService oauthService, redirect string) http.HandlerFunc {
 		code := r.URL.Query().Get("code")
 		accessToken, err := oauthService.ExchangeCode(code)
 		if err != nil {
+			log.WithError(err).Error("failed to exchange code")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
 
+		// TODO: longer expiration
 		http.SetCookie(w, &http.Cookie{
 			Name:  cookieAccessToken,
 			Value: accessToken,

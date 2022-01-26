@@ -51,7 +51,7 @@ export class LocalAPI extends API {
   async login(request: models.LoginRequest): Promise<models.LoginResponse> {
     await someSleep()
     return {
-      ok: true,
+      RedirectURL: "",
     }
   }
 

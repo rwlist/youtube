@@ -606,6 +606,10 @@ github.com/rwlist/gjrpc v0.0.2-0.20220121222057-d65045ea9b4e h1:LVnwkyHwooaNa19m
 github.com/rwlist/gjrpc v0.0.2-0.20220121222057-d65045ea9b4e/go.mod h1:kJrVNERh9+a3fQ7PCLc7iaB8o6r1HJQyB0NAn8Jr/t4=
 github.com/rwlist/gjrpc v0.0.2-0.20220122163549-70ba92f9fc22 h1:bXQyvZjyvppuljfQa/05G1+VNw54FjsE7PetUOx/G/k=
 github.com/rwlist/gjrpc v0.0.2-0.20220122163549-70ba92f9fc22/go.mod h1:kJrVNERh9+a3fQ7PCLc7iaB8o6r1HJQyB0NAn8Jr/t4=
+github.com/rwlist/gjrpc v0.0.2-0.20220123134005-4256d90609cb h1:nt1GPUIF9O8gGAWAdredb0Q5W5+TKqtixH5KvFop90E=
+github.com/rwlist/gjrpc v0.0.2-0.20220123134005-4256d90609cb/go.mod h1:ThHQ3EyMc0LkQn/hPzyLQ/UtnhfolrAORaVWTn0WwOQ=
+github.com/rwlist/gjrpc v0.0.2-0.20220123134804-fb6c3afb324e h1:KjXV1fKkMGNIWv0xrSU/yNocl00aBr8xrSAMRxGxBFc=
+github.com/rwlist/gjrpc v0.0.2-0.20220123134804-fb6c3afb324e/go.mod h1:ThHQ3EyMc0LkQn/hPzyLQ/UtnhfolrAORaVWTn0WwOQ=
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f h1:UFr9zpz4xgTnIE5yIMtWAMngCdZ9p/+q6lTbgelo80M=
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
 github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da h1:p3Vo3i64TCLY7gIfzeQaUJ+kppEO5WQG3cL8iE8tGHU=

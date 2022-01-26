@@ -14,4 +14,10 @@ import ListsExplorer from './pages/ListsExplorer.vue'
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Disable document padding and margin */
+body {
+  padding: 0;
+  margin: 0;
+}
 </style>

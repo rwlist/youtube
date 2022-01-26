@@ -2,16 +2,17 @@
 import ListController from '@/components/ListController.vue'
 import { ref } from 'vue'
 import { useLists } from '../composables/useLists'
+import AuthStatus from '../components/AuthStatus.vue';
 
 const { lists } = useLists()
-const selectedListID = ref('')
+const selectedListID = ref('$meta')
 </script>
 
 <template>
   <!-- Side navigation contains header and links to all items -->
   <div>
     <div class="side-nav">
-      <h3>rw youtube</h3>
+      <h3 class="side-header">rw youtube</h3>
       <div class="side-nav-flex border-top">
         <a
           v-for="list in lists"
@@ -22,6 +23,7 @@ const selectedListID = ref('')
           {{ list.name }}
         </a>
       </div>
+      <AuthStatus class="auth-status" />
     </div>
 
     <!-- Main content located aside of navigation -->
@@ -32,19 +34,26 @@ const selectedListID = ref('')
 </template>
 
 <style scoped>
+.auth-status {
+  margin-top: auto;
+}
+
 .side-nav {
   background: #f8f8f8;
   border-right: 1px solid #e7e7e7;
   height: 100vh;
-  overflow: auto;
+  overflow: hidden;
   position: fixed;
   top: 0;
   width: 200px;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .side-nav > h3 {
   font-weight: 1200;
+  margin-left: 5%;
 }
 
 .side-nav-flex {

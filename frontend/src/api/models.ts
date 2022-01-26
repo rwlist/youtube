@@ -3,7 +3,8 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  ok: boolean
+  ok?: boolean
+  RedirectURL: string
 }
 
 export interface StatusRequest {
