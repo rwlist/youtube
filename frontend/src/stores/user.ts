@@ -1,5 +1,5 @@
 import { reactive } from 'vue'
-import { authService } from '../api' 
+import api from '../api'
 
 export const user = reactive({
     isLoggedIn: false,
@@ -10,12 +10,12 @@ export const user = reactive({
 const updateUser = async () => {
     user.fecthed = false
     try {
-        const status = await authService.Status()
+        const status = await api.Auth.Status()
         user.isLoggedIn = true
         user.email = status.Email
     } catch (e) {
         // TODO: check if auth error
-        console.log(e)
+        console.log('auth status error', e)
         user.isLoggedIn = false
         user.email = ''
     }

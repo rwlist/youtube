@@ -46,7 +46,7 @@ const { status, allItems, query, executeQuery } = useListCtl(listId)
       </fieldset>
     </div>
     <div class="list-items">
-      <YoutubeCard v-for="item in allItems" :key="item.itemID" v-bind="item" />
+      <YoutubeCard v-for="item in allItems" :key="item.ItemID" v-bind="item" />
     </div>
   </div>
 </template>

@@ -1,3 +1,28 @@
+export class RpcError {
+    code: number
+    message: string
+    data: unknown
+
+    constructor(obj: unknown) {
+        if (
+            typeof obj === 'object' &&
+            obj != null &&
+            'code' in obj &&
+            'message' in obj &&
+            'data' in obj
+        ) {
+            const e = obj as RpcError
+            this.code = e.code
+            this.message = e.message
+            this.data = e.data
+            Object.assign(this, e)
+            return
+        }
+
+        throw new Error('invalid rpc error')
+    }
+}
+
 export class HTTPTransport {
     constructor(private url: string) {}
 
@@ -19,7 +44,7 @@ export class HTTPTransport {
             })
             const json = await result.json()
             if (json.error) {
-                throw json
+                throw new RpcError(json.error)
             }
             return json.result
         } catch (e) {

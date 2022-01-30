@@ -2,20 +2,20 @@
 import { computed } from 'vue'
 
 interface Props {
-    youtubeID: string,
-    title: string,
-    author: string,
-    channelID: string,
-    itemID: string,
-    xord: string
+    YoutubeID: string
+    Title: string
+    Author: string
+    ChannelID: string
+    ItemID: string
+    Xord: string
 }
 
 const props = defineProps<Props>()
 
-const channelURL = computed(() => `https://www.youtube.com/channel/${props.channelID}`)
-const ariaLabel = computed(() => `${props.title} by ${props.author}`)
-const watchURL = computed(() => `https://www.youtube.com/watch?v=${props.youtubeID}`)
-const thumbnailURL = computed(() => `https://i.ytimg.com/vi/${props.youtubeID}/hqdefault.jpg`)
+const channelURL = computed(() => `https://www.youtube.com/channel/${props.ChannelID}`)
+const ariaLabel = computed(() => `${props.Title} by ${props.Author}`)
+const watchURL = computed(() => `https://www.youtube.com/watch?v=${props.YoutubeID}`)
+const thumbnailURL = computed(() => `https://i.ytimg.com/vi/${props.YoutubeID}/hqdefault.jpg`)
 </script>
 
 <template>
@@ -29,24 +29,24 @@ const thumbnailURL = computed(() => `https://i.ytimg.com/vi/${props.youtubeID}/h
           id="video-title"
           :href="watchURL"
           :aria-label="ariaLabel"
-          :title="title"
+          :title="Title"
         >
-          {{ title }}
+          {{ Title }}
         </a>
       </span>
       <div id="metadata">
         <div id="byline-container">
           <div id="text-container">
-            <a spellcheck="false" :href="channelURL" dir="auto">{{ author }}</a>
+            <a spellcheck="false" :href="channelURL" dir="auto">{{ Author }}</a>
           </div>
           <div id="separator" />
         </div>
       </div>
     </div>
     <div class="internal">
-      <p>youtube: {{ youtubeID }}</p>
-      <p>xord: {{ xord }}</p>
-      <p>id: {{ itemID }}</p>
+      <p>youtube: {{ YoutubeID }}</p>
+      <p>xord: {{ Xord }}</p>
+      <p>id: {{ ItemID }}</p>
     </div>
   </div>
 </template>

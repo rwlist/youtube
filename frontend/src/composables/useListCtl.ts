@@ -1,44 +1,44 @@
-import type { ListItem } from '../api/models'
 import { Ref, ref, watch } from 'vue'
 import { fetchListByID, ListCtl, ListStatus } from '../api/lists'
+import { ListItem } from '../rpc/proto_gen'
 
 export function useListCtl(listID: Ref<string>) {
-  const status = ref<ListStatus>({
-    header: '',
-    response: '',
-  })
-  const allItems = ref<ReadonlyArray<ListItem>>([])
-
-  let listCtl: ListCtl | undefined = undefined
-
-  watch(
-    () => listID.value,
-    async (newListID) => {
-      status.value = {
-        header: 'Loading list...',
+    const status = ref<ListStatus>({
+        header: '',
         response: '',
-      }
-      allItems.value = []
+    })
+    const allItems = ref<ReadonlyArray<ListItem>>([])
 
-      if (newListID === '') {
-        listCtl = undefined
-        return
-      }
+    let listCtl: ListCtl | undefined = undefined
 
-      listCtl = await fetchListByID(newListID)
-      status.value = listCtl.statusRef()
-      allItems.value = listCtl.allItemsRef()
-    },
-    { immediate: true },
-  )
+    watch(
+        () => listID.value,
+        async (newListID) => {
+            status.value = {
+                header: 'Loading list...',
+                response: '',
+            }
+            allItems.value = []
 
-  const query = ref('')
-  const executeQuery = () => listCtl?.executeQuery(query.value)
+            if (newListID === '') {
+                listCtl = undefined
+                return
+            }
 
-  return {
-    status,
-    allItems,
-    query,
-    executeQuery,
-  }
+            listCtl = await fetchListByID(newListID)
+            status.value = listCtl.statusRef()
+            allItems.value = listCtl.allItemsRef()
+        },
+        { immediate: true },
+    )
+
+    const query = ref('')
+    const executeQuery = () => listCtl?.executeQuery(query.value)
+
+    return {
+        status,
+        allItems,
+        query,
+        executeQuery,
+    }
 }

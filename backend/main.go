@@ -68,7 +68,8 @@ func main() {
 	authService := logic.NewAuth(oauthConfig, usersRepo)
 	authServer := isrv.NewAuth(authService)
 	youtubeServer := isrv.NewYoutube(oauthConfig)
-	handlers := rpc.NewHandlers(authServer, youtubeServer)
+	listsServer := isrv.NewLists(oauthConfig)
+	handlers := rpc.NewHandlers(authServer, youtubeServer, listsServer)
 
 	var rpcHandler jsonrpc.Handler = rpc.NewRouter(handlers).Handle
 	rpcHandler = rpc.AuthMiddleware(authService, []string{"auth.oauth"})(rpcHandler)

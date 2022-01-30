@@ -16,11 +16,11 @@ const selectedListID = ref('$meta')
       <div class="side-nav-flex border-top">
         <a
           v-for="list in lists"
-          :key="list.id"
-          :class="{ 'side-nav-selected': list.id == selectedListID }"
-          @click="selectedListID = list.id"
+          :key="list.ID"
+          :class="{ 'side-nav-selected': list.ID == selectedListID }"
+          @click="selectedListID = list.ID"
         >
-          {{ list.name }}
+          {{ list.Name }}
         </a>
       </div>
       <AuthStatus class="auth-status" />

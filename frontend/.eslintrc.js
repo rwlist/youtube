@@ -8,9 +8,10 @@ module.exports = {
     withDefaults: 'readonly',
   },
   extends: [
-    '@vue/typescript/recommended',
-    'eslint:recommended',
-    'plugin:vue/vue3-recommended',
-    'prettier',
+    "plugin:vue/vue3-recommended",
+    "eslint:recommended",
+    "@vue/typescript/recommended",
+    // Add under other rules
+    "@vue/prettier",
   ],
 };

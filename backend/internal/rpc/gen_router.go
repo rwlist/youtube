@@ -3,6 +3,7 @@
 package rpc
 
 import (
+	"encoding/json"
 	jsonrpc "github.com/rwlist/gjrpc/pkg/jsonrpc"
 	"strings"
 )
@@ -38,6 +39,8 @@ func (r *Router) handle(path []string, req *jsonrpc.Request) (jsonrpc.Result, *j
 	switch path[0] {
 	case "auth":
 		return r.handleAuth(path[1:], req)
+	case "lists":
+		return r.handleLists(path[1:], req)
 	case "youtube":
 		return r.handleYoutube(path[1:], req)
 	}
@@ -53,6 +56,21 @@ func (r *Router) handleAuth(path []string, req *jsonrpc.Request) (jsonrpc.Result
 		return r.handleAuthOauth(path[1:], req)
 	case "status":
 		return r.handleAuthStatus(path[1:], req)
+	}
+	return r.notFound()
+}
+
+func (r *Router) handleLists(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		return r.notFound()
+	}
+	switch path[0] {
+	case "all":
+		return r.handleListsAll(path[1:], req)
+	case "listInfo":
+		return r.handleListsListInfo(path[1:], req)
+	case "listItems":
+		return r.handleListsListItems(path[1:], req)
 	}
 	return r.notFound()
 }
@@ -84,6 +102,47 @@ func (r *Router) handleAuthOauth(path []string, req *jsonrpc.Request) (jsonrpc.R
 func (r *Router) handleAuthStatus(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		res, err := r.handlers.Auth.Status(req.Context)
+		if err != nil {
+			return r.convertError(err)
+		}
+		return res, nil
+	}
+	return r.notFound()
+}
+
+func (r *Router) handleListsAll(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		res, err := r.handlers.Lists.All(req.Context)
+		if err != nil {
+			return r.convertError(err)
+		}
+		return res, nil
+	}
+	return r.notFound()
+}
+
+func (r *Router) handleListsListInfo(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		var request string
+		if err := json.Unmarshal(req.Params, &request); err != nil {
+			return r.convertError(err)
+		}
+		res, err := r.handlers.Lists.ListInfo(req.Context, request)
+		if err != nil {
+			return r.convertError(err)
+		}
+		return res, nil
+	}
+	return r.notFound()
+}
+
+func (r *Router) handleListsListItems(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		var request string
+		if err := json.Unmarshal(req.Params, &request); err != nil {
+			return r.convertError(err)
+		}
+		res, err := r.handlers.Lists.ListItems(req.Context, request)
 		if err != nil {
 			return r.convertError(err)
 		}
