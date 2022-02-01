@@ -1,3 +1,5 @@
+import { logout } from "../stores/user"
+
 export class RpcError {
     code: number
     message: string
@@ -23,10 +25,13 @@ export class RpcError {
     }
 }
 
+const authErrorCode = 2
+
 export class HTTPTransport {
     constructor(private url: string) {}
 
     async request(method: string, params: unknown): Promise<unknown> {
+        console.log('HTTP request', method, params)
         const jsonrpc = {
             jsonrpc: '2.0',
             method,
@@ -49,6 +54,9 @@ export class HTTPTransport {
             return json.result
         } catch (e) {
             console.log('HTTPTransport encountered error:', e)
+            if (e instanceof RpcError && e.code == authErrorCode) {
+                await logout()
+            }
             throw e
         }
     }

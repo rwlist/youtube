@@ -1,5 +1,6 @@
 import { reactive } from 'vue'
 import api from '../api'
+import { toast } from '../main'
 
 export const user = reactive({
     isLoggedIn: false,
@@ -7,7 +8,17 @@ export const user = reactive({
     fecthed: false,
 })
 
-const updateUser = async () => {
+export const logout = async () => {
+    if (!user.isLoggedIn) {
+        return
+    }
+    user.isLoggedIn = false
+    user.email = ''
+    user.fecthed = true
+    toast.info("You're been logged out, please login again.")
+}
+
+export const updateUser = async () => {
     user.fecthed = false
     try {
         const status = await api.Auth.Status()
@@ -21,5 +32,3 @@ const updateUser = async () => {
     }
     user.fecthed = true
 }
-
-updateUser()

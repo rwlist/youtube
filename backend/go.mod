@@ -11,7 +11,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/jackc/pgx/v4 v4.14.1 // indirect
 	github.com/prometheus/client_golang v1.10.0
-	github.com/rwlist/gjrpc v0.0.2-0.20220123134804-fb6c3afb324e // indirect
+	github.com/rwlist/gjrpc v0.0.3-0.20220201183738-c1745c4e9bce // indirect
 	github.com/sirupsen/logrus v1.8.1
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
 	golang.org/x/net v0.0.0-20220111093109-d55c255bac03 // indirect

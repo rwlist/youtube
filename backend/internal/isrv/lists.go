@@ -11,10 +11,14 @@ import (
 
 type Lists struct {
 	oauthConfig *oauth2.Config
+	youtube     *Youtube
 }
 
-func NewLists(oauthConfig *oauth2.Config) *Lists {
-	return &Lists{oauthConfig: oauthConfig}
+func NewLists(oauthConfig *oauth2.Config, youtube *Youtube) *Lists {
+	return &Lists{
+		oauthConfig: oauthConfig,
+		youtube:     youtube,
+	}
 }
 
 func (l *Lists) All(ctx context.Context) (proto.AllLists, error) {
@@ -55,6 +59,26 @@ func (l *Lists) ListInfo(ctx context.Context, listID string) (proto.ListInfo, er
 }
 
 func (l *Lists) ListItems(ctx context.Context, listID string) (proto.ListItems, error) {
+	if listID == "liked" {
+		liked, err := l.youtube.Liked(ctx)
+		if err != nil {
+			return proto.ListItems{}, err
+		}
+
+		items := make([]proto.ListItem, len(liked.Response.Items))
+		for i, item := range liked.Response.Items {
+			items[i] = proto.ListItem{
+				YoutubeID: item.ContentDetails.VideoId,
+				Title:     item.Snippet.Title,
+				Author:    item.Snippet.VideoOwnerChannelTitle,
+				ChannelID: item.Snippet.VideoOwnerChannelId,
+				ItemID:    item.Id,
+				Xord:      fmt.Sprintf("%05d", i),
+			}
+		}
+		return proto.ListItems{Items: items}, nil
+	}
+
 	if listID != "history" {
 		return proto.ListItems{}, fmt.Errorf("list not found")
 	}

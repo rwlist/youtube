@@ -610,6 +610,10 @@ github.com/rwlist/gjrpc v0.0.2-0.20220123134005-4256d90609cb h1:nt1GPUIF9O8gGAWA
 github.com/rwlist/gjrpc v0.0.2-0.20220123134005-4256d90609cb/go.mod h1:ThHQ3EyMc0LkQn/hPzyLQ/UtnhfolrAORaVWTn0WwOQ=
 github.com/rwlist/gjrpc v0.0.2-0.20220123134804-fb6c3afb324e h1:KjXV1fKkMGNIWv0xrSU/yNocl00aBr8xrSAMRxGxBFc=
 github.com/rwlist/gjrpc v0.0.2-0.20220123134804-fb6c3afb324e/go.mod h1:ThHQ3EyMc0LkQn/hPzyLQ/UtnhfolrAORaVWTn0WwOQ=
+github.com/rwlist/gjrpc v0.0.2 h1:MtbcAijwcQB7qDzs0jU00ggsQr+88mONfXNxh/Zhz4I=
+github.com/rwlist/gjrpc v0.0.2/go.mod h1:LEdFwSRgyKR1kBMvDz1NB/dBejoBVGVY9E2EltUiXOc=
+github.com/rwlist/gjrpc v0.0.3-0.20220201183738-c1745c4e9bce h1:yLfSgOwt+vq+Vjy9YTytD7aYqSI6L7m+LYXx4JYZfhY=
+github.com/rwlist/gjrpc v0.0.3-0.20220201183738-c1745c4e9bce/go.mod h1:LEdFwSRgyKR1kBMvDz1NB/dBejoBVGVY9E2EltUiXOc=
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f h1:UFr9zpz4xgTnIE5yIMtWAMngCdZ9p/+q6lTbgelo80M=
 github.com/ryanuber/columnize v0.0.0-20160712163229-9b3edd62028f/go.mod h1:sm1tb6uqfes/u+d4ooFouqFdy9/2g9QGwK3SQygK0Ts=
 github.com/samuel/go-zookeeper v0.0.0-20190923202752-2cc03de413da h1:p3Vo3i64TCLY7gIfzeQaUJ+kppEO5WQG3cL8iE8tGHU=

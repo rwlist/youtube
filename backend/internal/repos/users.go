@@ -26,7 +26,7 @@ func (r *Users) Save(user *models.User) error {
 }
 
 func (r *Users) UpdateGoogleOAuth(user *models.User) error {
-	return r.db.Model(user).Update("google_oauth", user.GoogleOAuth).Error
+	return r.db.Model(user).Update("google_o_auth", user.GoogleOAuth).Error
 }
 
 func (r *Users) FindByGoogleID(id string) (*models.User, error) {
