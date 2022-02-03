@@ -1,5 +1,16 @@
 package proto
 
+type ListType string
+
+const (
+	// ListTypeExternal cannot be modified, only can be synced
+	ListTypeExternal ListType = "external"
+	// ListTypeCustom can be modified, cannot be synced
+	ListTypeCustom ListType = "custom"
+	// ListTypeVirtual fully handled by the client
+	ListTypeVirtual ListType = "virtual"
+)
+
 //gjrpc:service lists
 type ListService interface {
 	//gjrpc:method all
@@ -17,14 +28,14 @@ type AllLists struct {
 }
 
 type ListInfo struct {
-	ID   string
+	// Short and unique for user, e.g. "liked"
+	ID string
+
+	// Human-readable name of the list
 	Name string
 
-	// external list: cannot be modified, only can be synced
-	// custom list: can be modified, cannot be synced
-	// virtual list: fully handled by the client
-	// type ListType = 'external' | 'custom' | 'virtual'
-	ListType string
+	// Type of the list
+	ListType ListType
 }
 
 type ListItems struct {
@@ -36,6 +47,6 @@ type ListItem struct {
 	Title     string
 	Author    string
 	ChannelID string
-	ItemID    string
+	ItemID    uint
 	Xord      string
 }

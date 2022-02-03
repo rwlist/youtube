@@ -3,53 +3,47 @@ package isrv
 import (
 	"context"
 	"fmt"
+	"github.com/rwlist/youtube/internal/lists"
 	"github.com/rwlist/youtube/internal/proto"
+	"github.com/rwlist/youtube/internal/rpc"
 	"golang.org/x/oauth2"
 )
-
-// TODO: implement real logic later
 
 type Lists struct {
 	oauthConfig *oauth2.Config
 	youtube     *Youtube
+	catalog     *lists.Catalog
 }
 
-func NewLists(oauthConfig *oauth2.Config, youtube *Youtube) *Lists {
+func NewLists(oauthConfig *oauth2.Config, youtube *Youtube, catalog *lists.Catalog) *Lists {
 	return &Lists{
 		oauthConfig: oauthConfig,
 		youtube:     youtube,
+		catalog:     catalog,
 	}
 }
 
 func (l *Lists) All(ctx context.Context) (proto.AllLists, error) {
+	user := rpc.GetUser(ctx)
+
+	all, err := l.catalog.UserLists(user.ID)
+	if err != nil {
+		return proto.AllLists{}, err
+	}
+
 	return proto.AllLists{
-		Lists: []proto.ListInfo{
-			{
-				ID:       "liked",
-				Name:     "Liked videos",
-				ListType: "external",
-			},
-			{
-				ID:       "history",
-				Name:     "History",
-				ListType: "external",
-			},
-			{
-				ID:       "view-later",
-				Name:     "View later",
-				ListType: "external",
-			},
-		},
+		Lists: all,
 	}, nil
 }
 
+// TODO: write better
 func (l *Lists) ListInfo(ctx context.Context, listID string) (proto.ListInfo, error) {
-	lists, err := l.All(ctx)
+	all, err := l.All(ctx)
 	if err != nil {
 		return proto.ListInfo{}, err
 	}
 
-	for _, list := range lists.Lists {
+	for _, list := range all.Lists {
 		if list.ID == listID {
 			return list, nil
 		}
@@ -59,48 +53,14 @@ func (l *Lists) ListInfo(ctx context.Context, listID string) (proto.ListInfo, er
 }
 
 func (l *Lists) ListItems(ctx context.Context, listID string) (proto.ListItems, error) {
-	if listID == "liked" {
-		liked, err := l.youtube.Liked(ctx)
-		if err != nil {
-			return proto.ListItems{}, err
-		}
+	user := rpc.GetUser(ctx)
 
-		items := make([]proto.ListItem, len(liked.Response.Items))
-		for i, item := range liked.Response.Items {
-			items[i] = proto.ListItem{
-				YoutubeID: item.ContentDetails.VideoId,
-				Title:     item.Snippet.Title,
-				Author:    item.Snippet.VideoOwnerChannelTitle,
-				ChannelID: item.Snippet.VideoOwnerChannelId,
-				ItemID:    item.Id,
-				Xord:      fmt.Sprintf("%05d", i),
-			}
-		}
-		return proto.ListItems{Items: items}, nil
-	}
-
-	if listID != "history" {
-		return proto.ListItems{}, fmt.Errorf("list not found")
+	items, err := l.catalog.ViewList(user.ID, listID)
+	if err != nil {
+		return proto.ListItems{}, err
 	}
 
 	return proto.ListItems{
-		Items: []proto.ListItem{
-			{
-				YoutubeID: "5ESJH1NLMLs",
-				Title:     "Children Of The Magenta Line",
-				Author:    "Mossie Fly",
-				ChannelID: "UCGIkFNbztHRaX0GB78SWaZA",
-				Xord:      "aba",
-				ItemID:    "0",
-			},
-			{
-				YoutubeID: "68T9EFlCsUc",
-				Title:     "Making Music Is Easy",
-				Author:    "Eliminate",
-				ChannelID: "UCI7kKmUuSQOHUvSWIYFDf1Q",
-				Xord:      "acc",
-				ItemID:    "1",
-			},
-		},
+		Items: items,
 	}, nil
 }

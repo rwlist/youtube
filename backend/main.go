@@ -7,6 +7,7 @@ import (
 	"github.com/rwlist/gjrpc/pkg/jsonrpc"
 	"github.com/rwlist/youtube/internal/conf"
 	"github.com/rwlist/youtube/internal/isrv"
+	"github.com/rwlist/youtube/internal/lists"
 	"github.com/rwlist/youtube/internal/logic"
 	"github.com/rwlist/youtube/internal/models"
 	"github.com/rwlist/youtube/internal/repos"
@@ -58,17 +59,28 @@ func main() {
 	if err != nil {
 		log.WithError(err).Fatal("failed to connect to postgres")
 	}
-	usersRepo := repos.NewUsers(db)
+	db = db.Debug()
 
-	err = db.AutoMigrate(&models.User{})
+	err = db.AutoMigrate(
+		&models.User{},
+		&models.CatalogList{},
+	)
 	if err != nil {
 		log.WithError(err).Fatal("failed to migrate tables")
 	}
 
-	authService := logic.NewAuth(oauthConfig, usersRepo)
+	usersRepo := repos.NewUsers(db)
+	catalogsRepo := repos.NewCatalogLists(db)
+	listData := repos.NewListData(db)
+
+	catalog := lists.NewCatalog(catalogsRepo, listData)
+	hooks := []logic.AuthHook{
+		catalog,
+	}
+	authService := logic.NewAuth(oauthConfig, usersRepo, hooks)
 	authServer := isrv.NewAuth(authService)
 	youtubeServer := isrv.NewYoutube(oauthConfig)
-	listsServer := isrv.NewLists(oauthConfig, youtubeServer)
+	listsServer := isrv.NewLists(oauthConfig, youtubeServer, catalog)
 	handlers := rpc.NewHandlers(authServer, youtubeServer, listsServer)
 
 	var rpcHandler jsonrpc.Handler

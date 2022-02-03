@@ -14,15 +14,21 @@ import (
 	"gorm.io/gorm"
 )
 
+type AuthHook interface {
+	UserHook(user *models.User) error
+}
+
 type Auth struct {
 	oauthConfig *oauth2.Config
 	repo        *repos.Users
+	hooks       []AuthHook
 }
 
-func NewAuth(oauthConfig *oauth2.Config, repo *repos.Users) *Auth {
+func NewAuth(oauthConfig *oauth2.Config, repo *repos.Users, hooks []AuthHook) *Auth {
 	return &Auth{
 		oauthConfig: oauthConfig,
 		repo:        repo,
+		hooks:       hooks,
 	}
 }
 
@@ -57,6 +63,7 @@ func (a *Auth) findUserOrCreate(tok *oauth2.Token) (*models.User, error) {
 	if user != nil {
 		user.GoogleToken = tok
 		a.UpdateIfRequired(user)
+		a.callHooks(user)
 		return user, nil
 	}
 
@@ -83,7 +90,17 @@ func (a *Auth) findUserOrCreate(tok *oauth2.Token) (*models.User, error) {
 		return nil, err
 	}
 
+	a.callHooks(user)
 	return user, nil
+}
+
+func (a *Auth) callHooks(user *models.User) {
+	for _, hook := range a.hooks {
+		err := hook.UserHook(user)
+		if err != nil {
+			log.WithError(err).WithField("userID", user.ID).Error("error while calling user hook")
+		}
+	}
 }
 
 // ExchangeCode for Google OAuth
