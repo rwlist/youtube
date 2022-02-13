@@ -1,6 +1,8 @@
 package lists
 
 import (
+	"fmt"
+	"github.com/rwlist/youtube/internal/global"
 	"github.com/rwlist/youtube/internal/models"
 	"github.com/rwlist/youtube/internal/proto"
 	"github.com/rwlist/youtube/internal/repos"
@@ -12,14 +14,16 @@ const (
 )
 
 type Catalog struct {
-	repo     *repos.CatalogLists
-	listData *repos.ListData
+	repo      *repos.CatalogLists
+	defaultDB *gorm.DB
+	dir       *global.Directory
 }
 
-func NewCatalog(repo *repos.CatalogLists, listData *repos.ListData) *Catalog {
+func NewCatalog(repo *repos.CatalogLists, defaultDB *gorm.DB, dir *global.Directory) *Catalog {
 	return &Catalog{
-		repo:     repo,
-		listData: listData,
+		repo:      repo,
+		defaultDB: defaultDB,
+		dir:       dir,
 	}
 }
 
@@ -41,12 +45,13 @@ func (c *Catalog) UserHook(user *models.User) error {
 	}
 
 	return c.repo.Create(entry, func(db *gorm.DB) error {
-		return c.createDataTable(db, entry)
-	})
-}
+		engine, err := c.buildEngine(db, entry)
+		if err != nil {
+			return err
+		}
 
-func (c *Catalog) createDataTable(db *gorm.DB, list *models.CatalogList) error {
-	return db.Table(list.TableName).Migrator().CreateTable(&models.ListDataUnique{})
+		return engine.InitStorage()
+	})
 }
 
 func (c *Catalog) listExists(userID uint, listID string) (bool, error) {
@@ -60,44 +65,36 @@ func (c *Catalog) listExists(userID uint, listID string) (bool, error) {
 	return true, nil
 }
 
-func (c *Catalog) UserLists(userID uint) ([]proto.ListInfo, error) {
+func (c *Catalog) UserLists(userID uint) ([]Engine, error) {
 	res, err := c.repo.FindUserLists(userID)
 	if err != nil {
 		return nil, err
 	}
 
-	lists := make([]proto.ListInfo, len(res))
+	lists := make([]Engine, len(res))
 	for i, l := range res {
-		lists[i] = proto.ListInfo{
-			ID:       l.ListID,
-			Name:     l.ListName,
-			ListType: l.ListType,
+		lists[i], err = c.buildEngine(c.defaultDB, &l)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return lists, nil
 }
 
-func (c *Catalog) ViewList(userID uint, listID string) ([]proto.ListItem, error) {
-	list, err := c.repo.GetByListID(userID, listID)
+func (c *Catalog) GetList(userID uint, listID string) (Engine, error) {
+	catalog, err := c.repo.GetByListID(userID, listID)
 	if err != nil {
 		return nil, err
 	}
 
-	items, err := c.listData.FindAllVerUnique(list)
-	if err != nil {
-		return nil, err
+	return c.buildEngine(c.defaultDB, catalog)
+}
+
+func (c *Catalog) buildEngine(db *gorm.DB, list *models.CatalogList) (Engine, error) {
+	storage := NewStorage(db, list)
+	if list.ListType == proto.ListTypeExternal && list.ListID == listLiked {
+		return NewLikedEngine(storage, c.dir), nil
 	}
 
-	res := make([]proto.ListItem, len(items))
-	for i, item := range items {
-		res[i] = proto.ListItem{
-			YoutubeID: item.YoutubeID,
-			Title:     item.Title,
-			Author:    item.Author,
-			ChannelID: item.ChannelID,
-			ItemID:    item.ItemID,
-			Xord:      item.Xord,
-		}
-	}
-	return res, nil
+	return nil, fmt.Errorf("list %s not supported, list type: %s", list.ListID, list.ListType)
 }

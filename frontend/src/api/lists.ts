@@ -27,6 +27,6 @@ export async function fetchListByID(listID: string): Promise<ListCtl> {
         return new MetaList()
     }
 
-    const listInfo = await api.ListService.ListInfo(listID)
+    const listInfo = await api.ListService.Info(listID)
     return new RemoteList(api, listInfo)
 }

@@ -49,6 +49,9 @@ export class MetaList implements ListCtl {
             case '$logout':
                 this.queryLogout()
                 break
+            case '$secret':
+                this.querySecret()
+                break
             default:
                 this.queryHelp()
         }
@@ -92,6 +95,22 @@ $logout: logout`
             console.error(e)
             this.status.value = 'ERROR'
             this.display.response = `Cannot log out`
+        }
+    }
+
+    private async querySecret() {
+        this.status.value = 'SECRET'
+
+        try {
+            const res = await api.Youtube.Liked()
+            console.log(res)
+        } catch (e) {
+            console.error(e)
+            if (e instanceof RpcError) {
+                console.log(e)
+            } else {
+                throw e
+            }
         }
     }
 }

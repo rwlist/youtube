@@ -6,12 +6,14 @@ import (
 	"github.com/rwlist/gjrpc/pkg/gjserver"
 	"github.com/rwlist/gjrpc/pkg/jsonrpc"
 	"github.com/rwlist/youtube/internal/conf"
+	"github.com/rwlist/youtube/internal/global"
 	"github.com/rwlist/youtube/internal/isrv"
 	"github.com/rwlist/youtube/internal/lists"
 	"github.com/rwlist/youtube/internal/logic"
 	"github.com/rwlist/youtube/internal/models"
 	"github.com/rwlist/youtube/internal/repos"
 	"github.com/rwlist/youtube/internal/rpc"
+	"github.com/rwlist/youtube/internal/ytsync"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/oauth2/v2"
 	"google.golang.org/api/youtube/v3"
@@ -71,17 +73,21 @@ func main() {
 
 	usersRepo := repos.NewUsers(db)
 	catalogsRepo := repos.NewCatalogLists(db)
-	listData := repos.NewListData(db)
 
-	catalog := lists.NewCatalog(catalogsRepo, listData)
+	globalDir := &global.Directory{
+		LikedSync: ytsync.NewLikedSync(oauthConfig, usersRepo),
+	}
+
+	catalog := lists.NewCatalog(catalogsRepo, db, globalDir)
 	hooks := []logic.AuthHook{
 		catalog,
 	}
 	authService := logic.NewAuth(oauthConfig, usersRepo, hooks)
 	authServer := isrv.NewAuth(authService)
 	youtubeServer := isrv.NewYoutube(oauthConfig)
-	listsServer := isrv.NewLists(oauthConfig, youtubeServer, catalog)
-	handlers := rpc.NewHandlers(authServer, youtubeServer, listsServer)
+	catalogServer := isrv.NewListsCatalog(oauthConfig, catalog)
+	listServer := isrv.NewList(oauthConfig, catalog)
+	handlers := rpc.NewHandlers(authServer, youtubeServer, catalogServer, listServer)
 
 	var rpcHandler jsonrpc.Handler
 	rpcHandler = rpc.NewRouter(handlers, rpc.ConvertError).Handle

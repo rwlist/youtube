@@ -39,8 +39,10 @@ func (r *Router) handle(path []string, req *jsonrpc.Request) (jsonrpc.Result, *j
 	switch path[0] {
 	case "auth":
 		return r.handleAuth(path[1:], req)
-	case "lists":
-		return r.handleLists(path[1:], req)
+	case "catalog":
+		return r.handleCatalog(path[1:], req)
+	case "list":
+		return r.handleList(path[1:], req)
 	case "youtube":
 		return r.handleYoutube(path[1:], req)
 	}
@@ -60,17 +62,28 @@ func (r *Router) handleAuth(path []string, req *jsonrpc.Request) (jsonrpc.Result
 	return r.notFound()
 }
 
-func (r *Router) handleLists(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+func (r *Router) handleCatalog(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		return r.notFound()
 	}
 	switch path[0] {
 	case "all":
-		return r.handleListsAll(path[1:], req)
-	case "listInfo":
-		return r.handleListsListInfo(path[1:], req)
-	case "listItems":
-		return r.handleListsListItems(path[1:], req)
+		return r.handleCatalogAll(path[1:], req)
+	}
+	return r.notFound()
+}
+
+func (r *Router) handleList(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		return r.notFound()
+	}
+	switch path[0] {
+	case "info":
+		return r.handleListInfo(path[1:], req)
+	case "items":
+		return r.handleListItems(path[1:], req)
+	case "sync":
+		return r.handleListSync(path[1:], req)
 	}
 	return r.notFound()
 }
@@ -110,9 +123,9 @@ func (r *Router) handleAuthStatus(path []string, req *jsonrpc.Request) (jsonrpc.
 	return r.notFound()
 }
 
-func (r *Router) handleListsAll(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+func (r *Router) handleCatalogAll(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
-		res, err := r.handlers.Lists.All(req.Context)
+		res, err := r.handlers.Catalog.All(req.Context)
 		if err != nil {
 			return r.convertError(err)
 		}
@@ -121,13 +134,13 @@ func (r *Router) handleListsAll(path []string, req *jsonrpc.Request) (jsonrpc.Re
 	return r.notFound()
 }
 
-func (r *Router) handleListsListInfo(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+func (r *Router) handleListInfo(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		var request string
 		if err := json.Unmarshal(req.Params, &request); err != nil {
 			return r.convertError(err)
 		}
-		res, err := r.handlers.Lists.ListInfo(req.Context, request)
+		res, err := r.handlers.List.Info(req.Context, request)
 		if err != nil {
 			return r.convertError(err)
 		}
@@ -136,13 +149,28 @@ func (r *Router) handleListsListInfo(path []string, req *jsonrpc.Request) (jsonr
 	return r.notFound()
 }
 
-func (r *Router) handleListsListItems(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+func (r *Router) handleListItems(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		var request string
 		if err := json.Unmarshal(req.Params, &request); err != nil {
 			return r.convertError(err)
 		}
-		res, err := r.handlers.Lists.ListItems(req.Context, request)
+		res, err := r.handlers.List.Items(req.Context, request)
+		if err != nil {
+			return r.convertError(err)
+		}
+		return res, nil
+	}
+	return r.notFound()
+}
+
+func (r *Router) handleListSync(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		var request string
+		if err := json.Unmarshal(req.Params, &request); err != nil {
+			return r.convertError(err)
+		}
+		res, err := r.handlers.List.Sync(req.Context, request)
 		if err != nil {
 			return r.convertError(err)
 		}

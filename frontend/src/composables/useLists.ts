@@ -22,7 +22,7 @@ export function useLists() {
 
         if (user.isLoggedIn) {
             try {
-                const fetched = await api.ListService.All()
+                const fetched = await api.ListsCatalog.All()
                 lists.value = prepareLists(fetched.Lists)
             } catch (e) {
                 console.error('Failed to get all lists', e)

@@ -36,3 +36,11 @@ func (r *Users) FindByGoogleID(id string) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+func (r *Users) Get(id uint) (*models.User, error) {
+	var user models.User
+	if err := r.db.First(&user, id).Error; err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

@@ -6,7 +6,7 @@ interface Props {
     Title: string
     Author: string
     ChannelID: string
-    ItemID: string
+    ItemID: number
     Xord: string
 }
 

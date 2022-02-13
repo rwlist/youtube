@@ -7,6 +7,7 @@ interface Transport {
 export interface API {
     Auth: Auth
     ListService: ListService
+    ListsCatalog: ListsCatalog
     Youtube: Youtube
 }
 
@@ -14,6 +15,7 @@ export function buildImpl(transport: Transport): API {
     return {
         Auth: new AuthImpl(transport),
         ListService: new ListServiceImpl(transport),
+        ListsCatalog: new ListsCatalogImpl(transport),
         Youtube: new YoutubeImpl(transport),
     }
 }
@@ -27,33 +29,45 @@ export class AuthImpl implements Auth {
     constructor(private transport: Transport) {}
 
     async Oauth(): Promise<OAuthResponse> {
-        return await this.transport.request("auth.oauth", null) as OAuthResponse;
+        return (await this.transport.request("auth.oauth", null)) as OAuthResponse;
     }
 
     async Status(): Promise<AuthStatus> {
-        return await this.transport.request("auth.status", null) as AuthStatus;
+        return (await this.transport.request("auth.status", null)) as AuthStatus;
     }
 }
 
 export interface ListService {
-    All(): Promise<AllLists>
-    ListInfo(params: string): Promise<ListInfo>
-    ListItems(params: string): Promise<ListItems>
+    Info(params: string): Promise<ListInfo>
+    Items(params: string): Promise<ListItems>
+    Sync(params: string): Promise<ListSync>
 }
 
 export class ListServiceImpl implements ListService {
     constructor(private transport: Transport) {}
 
+    async Info(params: string): Promise<ListInfo> {
+        return (await this.transport.request("list.info", params)) as ListInfo;
+    }
+
+    async Items(params: string): Promise<ListItems> {
+        return (await this.transport.request("list.items", params)) as ListItems;
+    }
+
+    async Sync(params: string): Promise<ListSync> {
+        return (await this.transport.request("list.sync", params)) as ListSync;
+    }
+}
+
+export interface ListsCatalog {
+    All(): Promise<AllLists>
+}
+
+export class ListsCatalogImpl implements ListsCatalog {
+    constructor(private transport: Transport) {}
+
     async All(): Promise<AllLists> {
-        return await this.transport.request("lists.all", null) as AllLists;
-    }
-
-    async ListInfo(params: string): Promise<ListInfo> {
-        return await this.transport.request("lists.listInfo", params) as ListInfo;
-    }
-
-    async ListItems(params: string): Promise<ListItems> {
-        return await this.transport.request("lists.listItems", params) as ListItems;
+        return (await this.transport.request("catalog.all", null)) as AllLists;
     }
 }
 
@@ -66,11 +80,11 @@ export class YoutubeImpl implements Youtube {
     constructor(private transport: Transport) {}
 
     async Playlists(): Promise<Playlists> {
-        return await this.transport.request("youtube.playlists", null) as Playlists;
+        return (await this.transport.request("youtube.playlists", null)) as Playlists;
     }
 
     async Liked(): Promise<PlaylistItems> {
-        return await this.transport.request("youtube.liked", null) as PlaylistItems;
+        return (await this.transport.request("youtube.liked", null)) as PlaylistItems;
     }
 }
 
@@ -85,7 +99,7 @@ export interface AuthStatus {
 export interface ListInfo {
     ID: string
     Name: string
-    ListType: string
+    ListType: ListType
 }
 
 export interface ListItem {
@@ -93,12 +107,16 @@ export interface ListItem {
     Title: string
     Author: string
     ChannelID: string
-    ItemID: string
+    ItemID: uint
     Xord: string
 }
 
 export interface ListItems {
     Items: ListItem[]
+}
+
+export interface ListSync {
+    Status: string
 }
 
 export interface OAuthResponse {

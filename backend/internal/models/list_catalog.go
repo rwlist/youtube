@@ -37,3 +37,11 @@ func (l *CatalogList) GenerateTableName() error {
 	}
 	return nil
 }
+
+func (l *CatalogList) ToInfo() *proto.ListInfo {
+	return &proto.ListInfo{
+		ID:       l.ListID,
+		Name:     l.ListName,
+		ListType: l.ListType,
+	}
+}

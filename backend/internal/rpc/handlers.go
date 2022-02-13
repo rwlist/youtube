@@ -13,15 +13,19 @@ type Handlers struct {
 	//gjrpc:handle-route proto.Youtube
 	Youtube YoutubeImpl
 
+	//gjrpc:handle-route proto.ListsCatalog
+	Catalog CatalogImpl
+
 	//gjrpc:handle-route proto.ListService
-	Lists ListsImpl
+	List ListImpl
 }
 
-func NewHandlers(auth AuthImpl, youtube YoutubeImpl, lists ListsImpl) Handlers {
+func NewHandlers(auth AuthImpl, youtube YoutubeImpl, catalog CatalogImpl, list ListImpl) Handlers {
 	return Handlers{
 		Auth:    auth,
 		Youtube: youtube,
-		Lists:   lists,
+		Catalog: catalog,
+		List:    list,
 	}
 }
 
@@ -35,8 +39,12 @@ type YoutubeImpl interface {
 	Liked(ctx context.Context) (proto.PlaylistItems, error)
 }
 
-type ListsImpl interface {
+type CatalogImpl interface {
 	All(ctx context.Context) (proto.AllLists, error)
-	ListInfo(ctx context.Context, listID string) (proto.ListInfo, error)
-	ListItems(ctx context.Context, listID string) (proto.ListItems, error)
+}
+
+type ListImpl interface {
+	Info(ctx context.Context, listID string) (proto.ListInfo, error)
+	Items(ctx context.Context, listID string) (proto.ListItems, error)
+	Sync(ctx context.Context, listID string) (proto.ListSync, error)
 }

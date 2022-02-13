@@ -11,7 +11,8 @@
     "@vue/eslint-config-prettier": "^7.0.0",
     "eslint-plugin-prettier": "^4.0.0",
     "vue": "^3.2.25",
-    "vue-toast-notification": "^3.0.0"
+    "vue-toast-notification": "^3.0.0",
+    "vue-virtual-scroll-grid": "^1.4.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.9.0",
