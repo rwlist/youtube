@@ -54,6 +54,24 @@ func (l *List) Items(ctx context.Context, listID string) (proto.ListItems, error
 	}, nil
 }
 
+func (l *List) PageItems(ctx context.Context, req proto.PageRequest) (proto.ListItems, error) {
+	user := rpc.GetUser(ctx)
+
+	engine, err := l.catalog.GetList(user.ID, req.ListID)
+	if err != nil {
+		return proto.ListItems{}, err
+	}
+
+	items, err := engine.PageItems(req)
+	if err != nil {
+		return proto.ListItems{}, err
+	}
+
+	return proto.ListItems{
+		Items: items,
+	}, nil
+}
+
 func (l *List) Sync(ctx context.Context, listID string) (proto.ListSync, error) {
 	user := rpc.GetUser(ctx)
 

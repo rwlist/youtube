@@ -1,6 +1,6 @@
 import api from '../api'
 import { DeepReadonly, UnwrapNestedRefs } from 'vue'
-import { ListItem } from '../rpc/proto_gen'
+import { ListInfo, ListItem } from '../rpc/proto_gen'
 import { MetaList } from './MetaList'
 import { RemoteList } from './RemoteList'
 
@@ -9,10 +9,18 @@ export interface ListStatus {
     response: string
 }
 
+export interface SupportMatrix {
+    // returns the instance if pagination is supported
+    pagedList?: PagedList
+}
+
 export interface ListCtl {
     // Return full list content, updating it reactively.
     // Usually initialized on the first call.
     allItemsRef(): DeepReadonly<UnwrapNestedRefs<ListItem[]>>
+
+    // Return object with supported features.
+    supportMatrix(): SupportMatrix
 
     // Return reactive object with current fetch status and
     // query response.
@@ -20,6 +28,13 @@ export interface ListCtl {
 
     // TODO: return promise?
     executeQuery(query: string): void
+}
+
+export interface PagedList {
+    getInfo(): ListInfo
+
+    // TODO: better than offset/limit?
+    fetchPage(offset: number, limit: number): Promise<ListItem[]>
 }
 
 export async function fetchListByID(listID: string): Promise<ListCtl> {

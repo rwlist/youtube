@@ -5,15 +5,16 @@ package rpc
 import (
 	"encoding/json"
 	jsonrpc "github.com/rwlist/gjrpc/pkg/jsonrpc"
+	proto "github.com/rwlist/youtube/internal/proto"
 	"strings"
 )
 
 type Router struct {
-	handlers     Handlers
+	handlers     *Handlers
 	convertError jsonrpc.ErrorConverter
 }
 
-func NewRouter(handlers Handlers, convertError jsonrpc.ErrorConverter) *Router {
+func NewRouter(handlers *Handlers, convertError jsonrpc.ErrorConverter) *Router {
 	if convertError == nil {
 		convertError = jsonrpc.DefaultErrorConverter
 	}
@@ -82,6 +83,8 @@ func (r *Router) handleList(path []string, req *jsonrpc.Request) (jsonrpc.Result
 		return r.handleListInfo(path[1:], req)
 	case "items":
 		return r.handleListItems(path[1:], req)
+	case "pageItems":
+		return r.handleListPageItems(path[1:], req)
 	case "sync":
 		return r.handleListSync(path[1:], req)
 	}
@@ -156,6 +159,21 @@ func (r *Router) handleListItems(path []string, req *jsonrpc.Request) (jsonrpc.R
 			return r.convertError(err)
 		}
 		res, err := r.handlers.List.Items(req.Context, request)
+		if err != nil {
+			return r.convertError(err)
+		}
+		return res, nil
+	}
+	return r.notFound()
+}
+
+func (r *Router) handleListPageItems(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		var request proto.PageRequest
+		if err := json.Unmarshal(req.Params, &request); err != nil {
+			return r.convertError(err)
+		}
+		res, err := r.handlers.List.PageItems(req.Context, request)
 		if err != nil {
 			return r.convertError(err)
 		}

@@ -10,7 +10,7 @@ import {
 import createAsyncProcess from '../utils/create-async-process'
 import { API, ListInfo, ListItem } from '../rpc/proto_gen'
 import { RpcError } from '../rpc/http'
-import { ListCtl, ListStatus } from './lists'
+import { ListCtl, ListStatus, SupportMatrix } from './lists'
 
 export class RemoteList implements ListCtl {
     constructor(private api: API, private listInfo: ListInfo) {}
@@ -75,6 +75,25 @@ export class RemoteList implements ListCtl {
                 this.querySync()
                 break
         }
+    }
+
+    supportMatrix(): SupportMatrix {
+        return {
+            pagedList: this,
+        }
+    }
+
+    getInfo(): ListInfo {
+        return this.listInfo
+    }
+
+    async fetchPage(offset: number, limit: number): Promise<ListItem[]> {
+        const res = await this.api.ListService.PageItems({
+            ListID: this.listInfo.ID,
+            Limit: limit,
+            Offset: offset,
+        })
+        return res.Items
     }
 
     private async querySync() {

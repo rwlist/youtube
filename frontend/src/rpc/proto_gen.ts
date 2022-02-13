@@ -40,6 +40,7 @@ export class AuthImpl implements Auth {
 export interface ListService {
     Info(params: string): Promise<ListInfo>
     Items(params: string): Promise<ListItems>
+    PageItems(params: PageRequest): Promise<ListItems>
     Sync(params: string): Promise<ListSync>
 }
 
@@ -52,6 +53,10 @@ export class ListServiceImpl implements ListService {
 
     async Items(params: string): Promise<ListItems> {
         return (await this.transport.request("list.items", params)) as ListItems;
+    }
+
+    async PageItems(params: PageRequest): Promise<ListItems> {
+        return (await this.transport.request("list.pageItems", params)) as ListItems;
     }
 
     async Sync(params: string): Promise<ListSync> {
@@ -100,6 +105,7 @@ export interface ListInfo {
     ID: string
     Name: string
     ListType: ListType
+    ItemsCount: number
 }
 
 export interface ListItem {
@@ -107,7 +113,7 @@ export interface ListItem {
     Title: string
     Author: string
     ChannelID: string
-    ItemID: uint
+    ItemID: number
     Xord: string
 }
 
@@ -123,6 +129,12 @@ export interface OAuthResponse {
     RedirectURL: string
 }
 
+export interface PageRequest {
+    ListID: string
+    Offset: number
+    Limit: number
+}
+
 export interface PlaylistItems {
     Response: unknown
 }
@@ -130,3 +142,5 @@ export interface PlaylistItems {
 export interface Playlists {
     Response: unknown
 }
+
+export type ListType = string

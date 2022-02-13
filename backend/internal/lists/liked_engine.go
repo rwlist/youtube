@@ -13,6 +13,7 @@ type Engine interface {
 	Info() (*proto.ListInfo, error)
 	ListItems() ([]proto.ListItem, error)
 	StartSync() (proto.ListSync, error)
+	PageItems(req proto.PageRequest) ([]proto.ListItem, error)
 }
 
 type LikedEngine struct {
@@ -45,7 +46,24 @@ func (e *LikedEngine) CatalogEntry() (*models.CatalogList, error) {
 }
 
 func (e *LikedEngine) Info() (*proto.ListInfo, error) {
-	return e.s.Catalog().ToInfo(), nil
+	info := e.s.Catalog().ToInfo()
+	itemsCount, err := e.s.CountAll()
+	if err != nil {
+		return nil, err
+	}
+	info.ItemsCount = itemsCount
+	return info, nil
+}
+
+func convertItem(item models.ListDataUnique) proto.ListItem {
+	return proto.ListItem{
+		YoutubeID: item.YoutubeID,
+		Title:     item.Title,
+		Author:    item.Author,
+		ChannelID: item.ChannelID,
+		ItemID:    item.ItemID,
+		Xord:      item.Xord,
+	}
 }
 
 func (e *LikedEngine) ListItems() ([]proto.ListItem, error) {
@@ -57,14 +75,21 @@ func (e *LikedEngine) ListItems() ([]proto.ListItem, error) {
 
 	res := make([]proto.ListItem, len(items))
 	for i, item := range items {
-		res[i] = proto.ListItem{
-			YoutubeID: item.YoutubeID,
-			Title:     item.Title,
-			Author:    item.Author,
-			ChannelID: item.ChannelID,
-			ItemID:    item.ItemID,
-			Xord:      item.Xord,
-		}
+		res[i] = convertItem(item)
+	}
+	return res, nil
+}
+
+func (e *LikedEngine) PageItems(req proto.PageRequest) ([]proto.ListItem, error) {
+	var items []models.ListDataUnique
+	err := e.s.FindByPageRequest(req, &items)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]proto.ListItem, len(items))
+	for i, item := range items {
+		res[i] = convertItem(item)
 	}
 	return res, nil
 }

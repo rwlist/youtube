@@ -2,6 +2,7 @@ package lists
 
 import (
 	"github.com/rwlist/youtube/internal/models"
+	"github.com/rwlist/youtube/internal/proto"
 	"gorm.io/gorm"
 )
 
@@ -41,6 +42,17 @@ func (s *Storage) FindAll(destArr interface{}) error {
 	return s.db.Table(s.catalog.TableName).Order("xord ASC").Find(destArr).Error
 }
 
+func (s *Storage) FindByPageRequest(req proto.PageRequest, destArr interface{}) error {
+	// TODO: how to make it work faster?
+	return s.db.
+		Table(s.catalog.TableName).
+		Order("xord ASC").
+		Offset(req.Offset).
+		Limit(req.Limit).
+		Find(destArr).
+		Error
+}
+
 func (s *Storage) FindByPrimaryKey(destArr interface{}, primaryKeys interface{}) error {
 	return s.db.Table(s.catalog.TableName).Find(destArr, primaryKeys).Error
 }
@@ -67,4 +79,10 @@ func (s *Storage) Insert(model interface{}) error {
 
 func (s *Storage) Save(model interface{}) error {
 	return s.db.Table(s.catalog.TableName).Save(model).Error
+}
+
+func (s *Storage) CountAll() (int, error) {
+	var count int64
+	err := s.db.Table(s.catalog.TableName).Count(&count).Error
+	return int(count), err
 }

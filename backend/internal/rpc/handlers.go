@@ -20,8 +20,8 @@ type Handlers struct {
 	List ListImpl
 }
 
-func NewHandlers(auth AuthImpl, youtube YoutubeImpl, catalog CatalogImpl, list ListImpl) Handlers {
-	return Handlers{
+func NewHandlers(auth AuthImpl, youtube YoutubeImpl, catalog CatalogImpl, list ListImpl) *Handlers {
+	return &Handlers{
 		Auth:    auth,
 		Youtube: youtube,
 		Catalog: catalog,
@@ -46,5 +46,6 @@ type CatalogImpl interface {
 type ListImpl interface {
 	Info(ctx context.Context, listID string) (proto.ListInfo, error)
 	Items(ctx context.Context, listID string) (proto.ListItems, error)
+	PageItems(ctx context.Context, req proto.PageRequest) (proto.ListItems, error)
 	Sync(ctx context.Context, listID string) (proto.ListSync, error)
 }

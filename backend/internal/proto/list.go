@@ -19,6 +19,9 @@ type ListService interface {
 	//gjrpc:method items
 	Items(listID string) (ListItems, error)
 
+	//gjrpc:method pageItems
+	PageItems(req PageRequest) (ListItems, error)
+
 	//gjrpc:method sync
 	Sync(listID string) (ListSync, error)
 }
@@ -32,6 +35,9 @@ type ListInfo struct {
 
 	// Type of the list
 	ListType ListType
+
+	// Number of items in the list
+	ItemsCount int
 }
 
 type ListItems struct {
@@ -49,4 +55,12 @@ type ListItem struct {
 
 type ListSync struct {
 	Status string
+}
+
+type PageRequest struct {
+	ListID string
+
+	// TODO: add query by xord
+	Offset int
+	Limit  int
 }

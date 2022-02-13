@@ -9,7 +9,7 @@ import {
 } from 'vue'
 import { ListItem } from '../rpc/proto_gen'
 import { RpcError } from '../rpc/http'
-import { ListCtl, ListStatus } from './lists'
+import { ListCtl, ListStatus, SupportMatrix } from './lists'
 import { logout } from '../stores/user'
 
 export class MetaList implements ListCtl {
@@ -34,6 +34,10 @@ export class MetaList implements ListCtl {
 
     statusRef(): DeepReadonly<UnwrapNestedRefs<ListStatus>> {
         return readonly(this.display)
+    }
+
+    supportMatrix(): SupportMatrix {
+        return {}
     }
 
     executeQuery(query: string): void {
