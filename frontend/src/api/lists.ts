@@ -26,8 +26,8 @@ export interface ListCtl {
     // query response.
     statusRef(): DeepReadonly<UnwrapNestedRefs<ListStatus>>
 
-    // TODO: return promise?
-    executeQuery(query: string): void
+    // TODO: write description
+    executeQuery(query: string): Promise<void>
 }
 
 export interface PagedList {

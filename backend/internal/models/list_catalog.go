@@ -2,10 +2,17 @@ package models
 
 import (
 	"crypto/rand"
+	"encoding/json"
 	"github.com/rwlist/youtube/internal/proto"
 	"gorm.io/gorm"
 	"time"
 )
+
+type CatalogMeta struct {
+	// empty -> no object id
+	ObjectIDField    string
+	IsUniqueObjectID bool
+}
 
 type CatalogList struct {
 	TableName string `gorm:"type:char(15);primaryKey"`
@@ -18,6 +25,9 @@ type CatalogList struct {
 
 	ListName string
 	ListType proto.ListType `gorm:"not null"`
+
+	MetaJSON []byte       `gorm:"type:jsonb"`
+	Meta     *CatalogMeta `gorm:"-"`
 }
 
 func (l *CatalogList) GenerateTableName() error {
@@ -44,4 +54,25 @@ func (l *CatalogList) ToInfo() *proto.ListInfo {
 		Name:     l.ListName,
 		ListType: l.ListType,
 	}
+}
+
+func (l *CatalogList) AfterLoad() error {
+	l.Meta = &CatalogMeta{}
+	if l.MetaJSON == nil {
+		return nil
+	}
+
+	if err := json.Unmarshal(l.MetaJSON, l.Meta); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (l *CatalogList) BeforeSave() error {
+	if l.Meta == nil {
+		l.Meta = &CatalogMeta{}
+	}
+	var err error
+	l.MetaJSON, err = json.Marshal(l.Meta)
+	return err
 }

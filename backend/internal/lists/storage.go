@@ -1,6 +1,7 @@
 package lists
 
 import (
+	"github.com/rwlist/youtube/internal/global"
 	"github.com/rwlist/youtube/internal/models"
 	"github.com/rwlist/youtube/internal/proto"
 	"gorm.io/gorm"
@@ -85,4 +86,14 @@ func (s *Storage) CountAll() (int, error) {
 	var count int64
 	err := s.db.Table(s.catalog.TableName).Count(&count).Error
 	return int(count), err
+}
+
+func (s *Storage) UpdateCatalog(repo global.CatalogLists, catalog models.CatalogList) error {
+	err := repo.Update(&catalog)
+	if err != nil {
+		return err
+	}
+
+	s.catalog = &catalog
+	return nil
 }

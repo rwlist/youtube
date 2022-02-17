@@ -41,7 +41,7 @@ export interface ListService {
     Info(params: string): Promise<ListInfo>
     Items(params: string): Promise<ListItems>
     PageItems(params: PageRequest): Promise<ListItems>
-    Sync(params: string): Promise<ListSync>
+    ExecuteQuery(params: Query): Promise<QueryResponse>
 }
 
 export class ListServiceImpl implements ListService {
@@ -59,8 +59,8 @@ export class ListServiceImpl implements ListService {
         return (await this.transport.request("list.pageItems", params)) as ListItems;
     }
 
-    async Sync(params: string): Promise<ListSync> {
-        return (await this.transport.request("list.sync", params)) as ListSync;
+    async ExecuteQuery(params: Query): Promise<QueryResponse> {
+        return (await this.transport.request("list.executeQuery", params)) as QueryResponse;
     }
 }
 
@@ -121,10 +121,6 @@ export interface ListItems {
     Items: ListItem[]
 }
 
-export interface ListSync {
-    Status: string
-}
-
 export interface OAuthResponse {
     RedirectURL: string
 }
@@ -141,6 +137,16 @@ export interface PlaylistItems {
 
 export interface Playlists {
     Response: unknown
+}
+
+export interface Query {
+    ListID: string
+    Query: string
+}
+
+export interface QueryResponse {
+    Status: string
+    Object: unknown
 }
 
 export type ListType = string

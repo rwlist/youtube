@@ -72,13 +72,13 @@ func (l *List) PageItems(ctx context.Context, req proto.PageRequest) (proto.List
 	}, nil
 }
 
-func (l *List) Sync(ctx context.Context, listID string) (proto.ListSync, error) {
+func (l *List) ExecuteQuery(ctx context.Context, query proto.Query) (proto.QueryResponse, error) {
 	user := rpc.GetUser(ctx)
 
-	engine, err := l.catalog.GetList(user.ID, listID)
+	engine, err := l.catalog.GetList(user.ID, query.ListID)
 	if err != nil {
-		return proto.ListSync{}, err
+		return proto.QueryResponse{}, err
 	}
 
-	return engine.StartSync()
+	return engine.ExecuteQuery(query.Query)
 }

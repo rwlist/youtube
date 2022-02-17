@@ -12,7 +12,7 @@ type Engine interface {
 	InitStorage() error
 	Info() (*proto.ListInfo, error)
 	ListItems() ([]proto.ListItem, error)
-	StartSync() (proto.ListSync, error)
+	ExecuteQuery(query string) (proto.QueryResponse, error)
 	PageItems(req proto.PageRequest) ([]proto.ListItem, error)
 }
 
@@ -201,7 +201,20 @@ func (e LikedEngine) Transaction(f func(e Engine) error) error {
 	})
 }
 
-func (e *LikedEngine) StartSync() (proto.ListSync, error) {
+func (e *LikedEngine) ExecuteQuery(query string) (proto.QueryResponse, error) {
+	switch query {
+	case ":sync":
+		return e.StartSync()
+	case ":metafix":
+		return e.FixMetadata()
+	}
+
+	return proto.QueryResponse{
+		Status: "unknown query",
+	}, nil
+}
+
+func (e *LikedEngine) StartSync() (proto.QueryResponse, error) {
 	id := time.Now().String()
 
 	go func() {
@@ -214,7 +227,26 @@ func (e *LikedEngine) StartSync() (proto.ListSync, error) {
 		}
 	}()
 
-	return proto.ListSync{
+	return proto.QueryResponse{
 		Status: "Sync is started, id=" + id,
+	}, nil
+}
+
+func (e *LikedEngine) FixMetadata() (proto.QueryResponse, error) {
+	catalog := *e.s.Catalog()
+	catalog.Meta = &models.CatalogMeta{
+		ObjectIDField:    "youtube_id",
+		IsUniqueObjectID: true,
+	}
+	err := e.s.UpdateCatalog(e.dir.CatalogsRepo, catalog)
+	if err != nil {
+		return proto.QueryResponse{
+			Status: "failed to update catalog",
+		}, err
+	}
+
+	return proto.QueryResponse{
+		Status: "Catalog is fixed",
+		Object: e.s.Catalog().Meta,
 	}, nil
 }

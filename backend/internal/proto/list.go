@@ -22,8 +22,8 @@ type ListService interface {
 	//gjrpc:method pageItems
 	PageItems(req PageRequest) (ListItems, error)
 
-	//gjrpc:method sync
-	Sync(listID string) (ListSync, error)
+	//gjrpc:method executeQuery
+	ExecuteQuery(query Query) (QueryResponse, error)
 }
 
 type ListInfo struct {
@@ -53,8 +53,14 @@ type ListItem struct {
 	Xord      string
 }
 
-type ListSync struct {
+type Query struct {
+	ListID string
+	Query  string
+}
+
+type QueryResponse struct {
 	Status string
+	Object interface{} `json:",omitempty"`
 }
 
 type PageRequest struct {

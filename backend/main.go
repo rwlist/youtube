@@ -75,7 +75,8 @@ func main() {
 	catalogsRepo := repos.NewCatalogLists(db)
 
 	globalDir := &global.Directory{
-		LikedSync: ytsync.NewLikedSync(oauthConfig, usersRepo),
+		LikedSync:    ytsync.NewLikedSync(oauthConfig, usersRepo),
+		CatalogsRepo: catalogsRepo,
 	}
 
 	catalog := lists.NewCatalog(catalogsRepo, db, globalDir)

@@ -64,16 +64,29 @@ export class RemoteList implements ListCtl {
         }
     }
 
-    executeQuery(query: string): void {
+    async executeQuery(query: string): Promise<void> {
         query = query.trim()
-
-        // TODO: implement queries
         console.log(`query: ${query}`)
 
-        switch (query) {
-            case ':sync':
-                this.querySync()
-                break
+        this.status.header = 'Status: QUERYING'
+
+        try {
+            const res = await this.api.ListService.ExecuteQuery({
+                ListID: this.listInfo.ID,
+                Query: query,
+            })
+            this.status.header = 'Status: QUERY'
+            this.status.response = res.Status
+            console.log(res)
+        } catch (e) {
+            console.error(e)
+            if (e instanceof RpcError) {
+                console.log(e)
+            } else {
+                throw e
+            }
+            this.status.header = 'Status: ERROR'
+            this.status.response = `Error: ${e.message}`
         }
     }
 
@@ -94,24 +107,5 @@ export class RemoteList implements ListCtl {
             Offset: offset,
         })
         return res.Items
-    }
-
-    private async querySync() {
-        this.status.header = 'Status: FETCHING'
-
-        try {
-            const res = await this.api.ListService.Sync(this.listInfo.ID)
-            this.status.header = 'Status: SYNC'
-            this.status.response = res.Status
-        } catch (e) {
-            console.error(e)
-            if (e instanceof RpcError) {
-                console.log(e)
-            } else {
-                throw e
-            }
-            this.status.header = 'Status: ERROR'
-            this.status.response = `Error: ${e.message}`
-        }
     }
 }

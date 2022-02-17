@@ -79,14 +79,14 @@ func (r *Router) handleList(path []string, req *jsonrpc.Request) (jsonrpc.Result
 		return r.notFound()
 	}
 	switch path[0] {
+	case "executeQuery":
+		return r.handleListExecuteQuery(path[1:], req)
 	case "info":
 		return r.handleListInfo(path[1:], req)
 	case "items":
 		return r.handleListItems(path[1:], req)
 	case "pageItems":
 		return r.handleListPageItems(path[1:], req)
-	case "sync":
-		return r.handleListSync(path[1:], req)
 	}
 	return r.notFound()
 }
@@ -137,6 +137,21 @@ func (r *Router) handleCatalogAll(path []string, req *jsonrpc.Request) (jsonrpc.
 	return r.notFound()
 }
 
+func (r *Router) handleListExecuteQuery(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
+	if len(path) == 0 {
+		var request proto.Query
+		if err := json.Unmarshal(req.Params, &request); err != nil {
+			return r.convertError(err)
+		}
+		res, err := r.handlers.List.ExecuteQuery(req.Context, request)
+		if err != nil {
+			return r.convertError(err)
+		}
+		return res, nil
+	}
+	return r.notFound()
+}
+
 func (r *Router) handleListInfo(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
 	if len(path) == 0 {
 		var request string
@@ -174,21 +189,6 @@ func (r *Router) handleListPageItems(path []string, req *jsonrpc.Request) (jsonr
 			return r.convertError(err)
 		}
 		res, err := r.handlers.List.PageItems(req.Context, request)
-		if err != nil {
-			return r.convertError(err)
-		}
-		return res, nil
-	}
-	return r.notFound()
-}
-
-func (r *Router) handleListSync(path []string, req *jsonrpc.Request) (jsonrpc.Result, *jsonrpc.Error) {
-	if len(path) == 0 {
-		var request string
-		if err := json.Unmarshal(req.Params, &request); err != nil {
-			return r.convertError(err)
-		}
-		res, err := r.handlers.List.Sync(req.Context, request)
 		if err != nil {
 			return r.convertError(err)
 		}

@@ -40,7 +40,7 @@ export class MetaList implements ListCtl {
         return {}
     }
 
-    executeQuery(query: string): void {
+    async executeQuery(query: string): Promise<void> {
         query = query.trim()
 
         switch (query) {

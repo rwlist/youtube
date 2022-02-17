@@ -16,12 +16,26 @@ func NewCatalogLists(db *gorm.DB) *CatalogLists {
 func (r *CatalogLists) FindUserLists(userID uint) ([]models.CatalogList, error) {
 	var lists []models.CatalogList
 	err := r.db.Where("user_id = ?", userID).Find(&lists).Error
-	return lists, err
+	if err != nil {
+		return nil, err
+	}
+	for i := range lists {
+		err := lists[i].AfterLoad()
+		if err != nil {
+			return nil, err
+		}
+	}
+	return lists, nil
 }
 
 // Create will generate TableName automatically.
 func (r *CatalogLists) Create(list *models.CatalogList, txCallback func(*gorm.DB) error) error {
 	err := list.GenerateTableName()
+	if err != nil {
+		return err
+	}
+
+	err = list.BeforeSave()
 	if err != nil {
 		return err
 	}
@@ -35,8 +49,24 @@ func (r *CatalogLists) Create(list *models.CatalogList, txCallback func(*gorm.DB
 	})
 }
 
+func (r *CatalogLists) Update(list *models.CatalogList) error {
+	err := list.BeforeSave()
+	if err != nil {
+		return err
+	}
+
+	return r.db.Save(list).Error
+}
+
 func (r *CatalogLists) GetByListID(userID uint, listID string) (*models.CatalogList, error) {
 	var list models.CatalogList
 	err := r.db.Where("user_id = ? AND list_id = ?", userID, listID).First(&list).Error
-	return &list, err
+	if err != nil {
+		return nil, err
+	}
+	err = list.AfterLoad()
+	if err != nil {
+		return nil, err
+	}
+	return &list, nil
 }

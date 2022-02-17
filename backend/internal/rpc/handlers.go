@@ -47,5 +47,5 @@ type ListImpl interface {
 	Info(ctx context.Context, listID string) (proto.ListInfo, error)
 	Items(ctx context.Context, listID string) (proto.ListItems, error)
 	PageItems(ctx context.Context, req proto.PageRequest) (proto.ListItems, error)
-	Sync(ctx context.Context, listID string) (proto.ListSync, error)
+	ExecuteQuery(ctx context.Context, query proto.Query) (proto.QueryResponse, error)
 }
