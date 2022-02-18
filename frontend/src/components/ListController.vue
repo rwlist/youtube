@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { toRefs } from 'vue'
 import { useListCtl } from '../composables/useListCtl'
-import { ListItem } from '../rpc/proto_gen'
+import type { ItemLiked } from '../rpc/proto_gen'
 import YoutubeCard from './YoutubeCard.vue'
 import Grid from 'vue-virtual-scroll-grid'
 
 const props = defineProps<{ listId: string }>()
 
-const placeholderProp: ListItem = {
+// TODO: don't always cast to ItemLiked
+
+const placeholderProp: ItemLiked = {
     YoutubeID: '',
     Title: '',
     Author: '',
@@ -24,16 +26,18 @@ const { status, allItems, query, executeQuery, supportsPages, getPagedList } =
 const pageProvider = (
     pageNumber: number,
     pageSize: number,
-): Promise<ListItem[]> => {
+): Promise<ItemLiked[]> => {
     return getPagedList()
         .fetchPage(pageNumber * pageSize, pageSize)
-        .then((it) => {
+        .then((listItems) => {
+            const it = listItems as ItemLiked[]
+
             if (it.length < pageSize) {
                 return [
                     ...it,
                     ...(Array(pageSize - it.length).fill(
                         placeholderProp,
-                    ) as ListItem[]),
+                    ) as ItemLiked[]),
                 ]
             }
             return it
@@ -102,8 +106,8 @@ const pageProvider = (
         <div v-else class="list-items">
             <YoutubeCard
                 v-for="item in allItems"
-                :key="item.ItemID"
-                v-bind="item"
+                :key="(item as ItemLiked).ItemID"
+                v-bind="(item as ItemLiked)"
             />
         </div>
     </div>

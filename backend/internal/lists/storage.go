@@ -63,8 +63,8 @@ func (s *Storage) FindByYoutubeID(destArr interface{}, ids []string) error {
 	return s.db.Table(s.catalog.TableName).Where("youtube_id IN ?", ids).Find(destArr).Error
 }
 
-func (s *Storage) FirstByYoutubeID(dest interface{}, id string) error {
-	return s.db.Table(s.catalog.TableName).Where("youtube_id = ?", id).Find(dest).Error
+func (s *Storage) FirstByKey(dest interface{}, key string, value interface{}) error {
+	return s.db.Table(s.catalog.TableName).Where(key+" = ?", value).Find(dest).Error
 }
 
 func (s *Storage) OrderLimit(res interface{}, xord string, cnt int) error {

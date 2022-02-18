@@ -1,11 +1,13 @@
 package models
 
 import (
+	"github.com/rwlist/youtube/internal/proto"
 	"google.golang.org/api/youtube/v3"
 	"time"
 )
 
-type ListDataUnique struct {
+// Model is generic header for all objects in the list. Should be embedded in user structs.
+type Model struct {
 	// permanent id
 	ItemID    uint `gorm:"primarykey"`
 	CreatedAt time.Time
@@ -13,7 +15,30 @@ type ListDataUnique struct {
 
 	// actually can be non unique, but still changes frequently
 	Xord string `gorm:"not null;unique"`
+}
 
+func XordModel(xord string) Model {
+	return Model{
+		Xord: xord,
+	}
+}
+
+func (m Model) Meta() proto.Meta {
+	return proto.Meta{
+		ItemID:    m.ItemID,
+		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
+		Xord:      m.Xord,
+	}
+}
+
+// LikedModel is used for automigration.
+type LikedModel struct {
+	Model
+	LikedData
+}
+
+type LikedData struct {
 	// generic youtube info, can only update in rare cases
 	YoutubeID string `gorm:"not null;unique"`
 	Title     string `gorm:"not null"`
@@ -24,12 +49,9 @@ type ListDataUnique struct {
 	PublishedAt *time.Time // when added to original playlist
 }
 
-func (u *ListDataUnique) UpdateData(data *YoutubeData) {
-	u.YoutubeID = data.YoutubeID
-	u.Title = data.Title
-	u.Author = data.Author
-	u.ChannelID = data.ChannelID
-	u.PublishedAt = data.PublishedAt
+func LikedDataFromYoutube(data *YoutubeData) *LikedData {
+	res := LikedData(*data)
+	return &res
 }
 
 type YoutubeData struct {
@@ -43,7 +65,7 @@ type YoutubeData struct {
 	PublishedAt *time.Time // when added to original playlist
 }
 
-func ItemToData(item *youtube.PlaylistItem) (*YoutubeData, error) {
+func FromYoutubeItem(item *youtube.PlaylistItem) (*YoutubeData, error) {
 	publishedAt, err := time.Parse(time.RFC3339, item.Snippet.PublishedAt)
 	if err != nil {
 		return nil, err

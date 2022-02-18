@@ -1,5 +1,7 @@
 package proto
 
+import "time"
+
 type ListType string
 
 const (
@@ -44,12 +46,26 @@ type ListItems struct {
 	Items []ListItem
 }
 
-type ListItem struct {
+// ListItem is any struct that have Meta embedded in it, must be present in serialized JSON too.
+type ListItem interface {
+	Meta() Meta
+}
+
+// ItemLiked is a type declaration for usage in typescript.
+type ItemLiked struct {
+	ItemID uint
+	Xord   string
+
 	YoutubeID string
 	Title     string
 	Author    string
 	ChannelID string
+}
+
+type Meta struct {
 	ItemID    uint
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	Xord      string
 }
 

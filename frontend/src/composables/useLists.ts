@@ -9,12 +9,13 @@ export function useLists() {
 
     // TODO: prevent running multiple requests at the same time!!!
     async function fetchLists(): Promise<void> {
-        const prepareLists = (fetched: ListInfo[]) => {
+        const prepareLists = (fetched: ListInfo[]): ListInfo[] => {
             return [
                 {
                     ID: '$meta',
                     Name: 'Meta',
                     ListType: 'virtual',
+                    ItemsCount: 0,
                 },
             ].concat(fetched)
         }

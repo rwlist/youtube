@@ -101,6 +101,15 @@ export interface AuthStatus {
     Email: string
 }
 
+export interface ItemLiked {
+    ItemID: number
+    Xord: string
+    YoutubeID: string
+    Title: string
+    Author: string
+    ChannelID: string
+}
+
 export interface ListInfo {
     ID: string
     Name: string
@@ -108,17 +117,15 @@ export interface ListInfo {
     ItemsCount: number
 }
 
-export interface ListItem {
-    YoutubeID: string
-    Title: string
-    Author: string
-    ChannelID: string
-    ItemID: number
-    Xord: string
-}
-
 export interface ListItems {
     Items: ListItem[]
+}
+
+export interface Meta {
+    ItemID: number
+    CreatedAt: unknown
+    UpdatedAt: unknown
+    Xord: string
 }
 
 export interface OAuthResponse {
@@ -148,5 +155,7 @@ export interface QueryResponse {
     Status: string
     Object: unknown
 }
+
+export type ListItem = unknown
 
 export type ListType = string

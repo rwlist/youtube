@@ -91,7 +91,7 @@ func (s *LikedSync) updateSome(id string, engine global.LikedEngine, items []*yo
 		return false, err
 	}
 
-	localMap := make(map[string]models.ListDataUnique)
+	localMap := make(map[string]models.LikedModel)
 	for _, l := range local {
 		localMap[l.YoutubeID] = l
 	}
@@ -100,7 +100,7 @@ func (s *LikedSync) updateSome(id string, engine global.LikedEngine, items []*yo
 	finished = true
 
 	for _, item := range items {
-		data, err := models.ItemToData(item)
+		data, err := models.FromYoutubeItem(item)
 		if err != nil {
 			return false, err
 		}
@@ -108,7 +108,7 @@ func (s *LikedSync) updateSome(id string, engine global.LikedEngine, items []*yo
 		localItem, ok := localMap[data.YoutubeID]
 		if !ok {
 			finished = false
-			newItem, err := engine.InsertAfter(*xord, data)
+			newItem, err := engine.InsertAfter(*xord, models.LikedDataFromYoutube(data))
 			if err != nil {
 				return false, err
 			}
@@ -120,7 +120,7 @@ func (s *LikedSync) updateSome(id string, engine global.LikedEngine, items []*yo
 			finished = false
 		}
 
-		newItem, err := engine.UpdateData(data)
+		newItem, err := engine.UpdateData(models.LikedDataFromYoutube(data))
 		if err != nil {
 			return false, err
 		}

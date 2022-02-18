@@ -8,14 +8,6 @@ import (
 	"time"
 )
 
-type Engine interface {
-	InitStorage() error
-	Info() (*proto.ListInfo, error)
-	ListItems() ([]proto.ListItem, error)
-	ExecuteQuery(query string) (*proto.QueryResponse, error)
-	PageItems(req *proto.PageRequest) ([]proto.ListItem, error)
-}
-
 type LikedEngine struct {
 	s   *Storage
 	dir *global.Directory
@@ -29,11 +21,11 @@ func NewLikedEngine(s *Storage, dir *global.Directory) *LikedEngine {
 }
 
 func (e *LikedEngine) InitStorage() error {
-	return e.s.CreateTable(&models.ListDataUnique{})
+	return e.s.CreateTable(&models.LikedModel{})
 }
 
 func (e *LikedEngine) Automigrate() error {
-	return e.s.Automigrate(&models.ListDataUnique{})
+	return e.s.Automigrate(&models.LikedModel{})
 }
 
 func (e LikedEngine) ReplaceStorage(s *Storage) *LikedEngine {
@@ -55,64 +47,50 @@ func (e *LikedEngine) Info() (*proto.ListInfo, error) {
 	return info, nil
 }
 
-func convertItem(item models.ListDataUnique) proto.ListItem {
-	return proto.ListItem{
-		YoutubeID: item.YoutubeID,
-		Title:     item.Title,
-		Author:    item.Author,
-		ChannelID: item.ChannelID,
-		ItemID:    item.ItemID,
-		Xord:      item.Xord,
+func convertItems(items []models.LikedModel) []proto.ListItem {
+	res := make([]proto.ListItem, len(items))
+	for i, item := range items {
+		item := item
+		res[i] = item
 	}
+	return res
 }
 
 func (e *LikedEngine) ListItems() ([]proto.ListItem, error) {
-	var items []models.ListDataUnique
+	var items []models.LikedModel
 	err := e.s.FindAll(&items)
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]proto.ListItem, len(items))
-	for i, item := range items {
-		res[i] = convertItem(item)
-	}
-	return res, nil
+	return convertItems(items), nil
 }
 
 func (e *LikedEngine) PageItems(req *proto.PageRequest) ([]proto.ListItem, error) {
-	var items []models.ListDataUnique
+	var items []models.LikedModel
 	err := e.s.FindByPageRequest(req, &items)
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]proto.ListItem, len(items))
-	for i, item := range items {
-		res[i] = convertItem(item)
-	}
-	return res, nil
+	return convertItems(items), nil
 }
 
-func (e *LikedEngine) FindTyped(youtubeIDs []string) ([]models.ListDataUnique, error) {
-	var items []models.ListDataUnique
+func (e *LikedEngine) FindTyped(youtubeIDs []string) ([]models.LikedModel, error) {
+	var items []models.LikedModel
 	err := e.s.FindByYoutubeID(&items, youtubeIDs)
 	return items, err
 }
 
-func (e *LikedEngine) InsertAfter(xord string, data *models.YoutubeData) (*models.ListDataUnique, error) {
+func (e *LikedEngine) InsertAfter(xord string, data *models.LikedData) (*models.LikedModel, error) {
 	newXord, err := e.prepareXord(xord)
 	if err != nil {
 		return nil, err
 	}
 
-	item := models.ListDataUnique{
-		Xord:        newXord,
-		YoutubeID:   data.YoutubeID,
-		Title:       data.Title,
-		Author:      data.Author,
-		ChannelID:   data.ChannelID,
-		PublishedAt: data.PublishedAt,
+	item := models.LikedModel{
+		Model:     models.XordModel(newXord),
+		LikedData: *data,
 	}
 	err = e.s.Insert(&item)
 	if err != nil {
@@ -129,7 +107,7 @@ func (e *LikedEngine) prepareXord(at string) (string, error) {
 		cnt = 3
 	}
 
-	var start []models.ListDataUnique
+	var start []models.LikedModel
 	err := e.s.OrderLimit(&start, at, cnt)
 	if err != nil {
 		return "", err
@@ -155,15 +133,16 @@ func (e *LikedEngine) prepareXord(at string) (string, error) {
 	return newXord, nil
 }
 
-func (e *LikedEngine) UpdateData(data *models.YoutubeData) (*models.ListDataUnique, error) {
-	var model models.ListDataUnique
+func (e *LikedEngine) UpdateData(data *models.LikedData) (*models.LikedModel, error) {
+	var model models.LikedModel
 	// TODO: don't fetch full model to update
-	err := e.s.FirstByYoutubeID(&model, data.YoutubeID)
+	err := e.s.FirstByKey(&model, e.s.Catalog().Meta.ObjectIDField, data.YoutubeID)
 	if err != nil {
 		return nil, err
 	}
 
-	model.UpdateData(data)
+	model.LikedData = *data
+
 	err = e.s.Save(&model)
 	if err != nil {
 		return nil, err
@@ -181,7 +160,7 @@ func (e *LikedEngine) MoveAfter(xord string, itemID uint) (newXord string, err e
 	return newXord, e.s.UpdateXord(itemID, newXord)
 }
 
-func (e *LikedEngine) shiftRight(nxt2 []models.ListDataUnique) error {
+func (e *LikedEngine) shiftRight(nxt2 []models.LikedModel) error {
 	if len(nxt2) == 0 {
 		return nil
 	}
