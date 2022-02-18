@@ -12,8 +12,8 @@ type Engine interface {
 	InitStorage() error
 	Info() (*proto.ListInfo, error)
 	ListItems() ([]proto.ListItem, error)
-	ExecuteQuery(query string) (proto.QueryResponse, error)
-	PageItems(req proto.PageRequest) ([]proto.ListItem, error)
+	ExecuteQuery(query string) (*proto.QueryResponse, error)
+	PageItems(req *proto.PageRequest) ([]proto.ListItem, error)
 }
 
 type LikedEngine struct {
@@ -80,7 +80,7 @@ func (e *LikedEngine) ListItems() ([]proto.ListItem, error) {
 	return res, nil
 }
 
-func (e *LikedEngine) PageItems(req proto.PageRequest) ([]proto.ListItem, error) {
+func (e *LikedEngine) PageItems(req *proto.PageRequest) ([]proto.ListItem, error) {
 	var items []models.ListDataUnique
 	err := e.s.FindByPageRequest(req, &items)
 	if err != nil {
@@ -201,7 +201,7 @@ func (e LikedEngine) Transaction(f func(e Engine) error) error {
 	})
 }
 
-func (e *LikedEngine) ExecuteQuery(query string) (proto.QueryResponse, error) {
+func (e *LikedEngine) ExecuteQuery(query string) (*proto.QueryResponse, error) {
 	switch query {
 	case ":sync":
 		return e.StartSync()
@@ -209,12 +209,12 @@ func (e *LikedEngine) ExecuteQuery(query string) (proto.QueryResponse, error) {
 		return e.FixMetadata()
 	}
 
-	return proto.QueryResponse{
+	return &proto.QueryResponse{
 		Status: "unknown query",
 	}, nil
 }
 
-func (e *LikedEngine) StartSync() (proto.QueryResponse, error) {
+func (e *LikedEngine) StartSync() (*proto.QueryResponse, error) {
 	id := time.Now().String()
 
 	go func() {
@@ -227,12 +227,12 @@ func (e *LikedEngine) StartSync() (proto.QueryResponse, error) {
 		}
 	}()
 
-	return proto.QueryResponse{
+	return &proto.QueryResponse{
 		Status: "Sync is started, id=" + id,
 	}, nil
 }
 
-func (e *LikedEngine) FixMetadata() (proto.QueryResponse, error) {
+func (e *LikedEngine) FixMetadata() (*proto.QueryResponse, error) {
 	catalog := *e.s.Catalog()
 	catalog.Meta = &models.CatalogMeta{
 		ObjectIDField:    "youtube_id",
@@ -240,12 +240,12 @@ func (e *LikedEngine) FixMetadata() (proto.QueryResponse, error) {
 	}
 	err := e.s.UpdateCatalog(e.dir.CatalogsRepo, catalog)
 	if err != nil {
-		return proto.QueryResponse{
+		return &proto.QueryResponse{
 			Status: "failed to update catalog",
 		}, err
 	}
 
-	return proto.QueryResponse{
+	return &proto.QueryResponse{
 		Status: "Catalog is fixed",
 		Object: e.s.Catalog().Meta,
 	}, nil

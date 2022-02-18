@@ -143,7 +143,7 @@ func (r *Router) handleListExecuteQuery(path []string, req *jsonrpc.Request) (js
 		if err := json.Unmarshal(req.Params, &request); err != nil {
 			return r.convertError(err)
 		}
-		res, err := r.handlers.List.ExecuteQuery(req.Context, request)
+		res, err := r.handlers.List.ExecuteQuery(req.Context, &request)
 		if err != nil {
 			return r.convertError(err)
 		}
@@ -188,7 +188,7 @@ func (r *Router) handleListPageItems(path []string, req *jsonrpc.Request) (jsonr
 		if err := json.Unmarshal(req.Params, &request); err != nil {
 			return r.convertError(err)
 		}
-		res, err := r.handlers.List.PageItems(req.Context, request)
+		res, err := r.handlers.List.PageItems(req.Context, &request)
 		if err != nil {
 			return r.convertError(err)
 		}

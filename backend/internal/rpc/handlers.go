@@ -30,22 +30,22 @@ func NewHandlers(auth AuthImpl, youtube YoutubeImpl, catalog CatalogImpl, list L
 }
 
 type AuthImpl interface {
-	Oauth(ctx context.Context) (proto.OAuthResponse, error)
-	Status(ctx context.Context) (proto.AuthStatus, error)
+	Oauth(ctx context.Context) (*proto.OAuthResponse, error)
+	Status(ctx context.Context) (*proto.AuthStatus, error)
 }
 
 type YoutubeImpl interface {
-	Playlists(ctx context.Context) (proto.Playlists, error)
-	Liked(ctx context.Context) (proto.PlaylistItems, error)
+	Playlists(ctx context.Context) (*proto.Playlists, error)
+	Liked(ctx context.Context) (*proto.PlaylistItems, error)
 }
 
 type CatalogImpl interface {
-	All(ctx context.Context) (proto.AllLists, error)
+	All(ctx context.Context) (*proto.AllLists, error)
 }
 
 type ListImpl interface {
-	Info(ctx context.Context, listID string) (proto.ListInfo, error)
-	Items(ctx context.Context, listID string) (proto.ListItems, error)
-	PageItems(ctx context.Context, req proto.PageRequest) (proto.ListItems, error)
-	ExecuteQuery(ctx context.Context, query proto.Query) (proto.QueryResponse, error)
+	Info(ctx context.Context, listID string) (*proto.ListInfo, error)
+	Items(ctx context.Context, listID string) (*proto.ListItems, error)
+	PageItems(ctx context.Context, req *proto.PageRequest) (*proto.ListItems, error)
+	ExecuteQuery(ctx context.Context, query *proto.Query) (*proto.QueryResponse, error)
 }

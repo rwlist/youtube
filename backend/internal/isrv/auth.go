@@ -17,16 +17,16 @@ func NewAuth(authService *logic.Auth) *Auth {
 	}
 }
 
-func (a *Auth) Oauth(ctx context.Context) (proto.OAuthResponse, error) {
+func (a *Auth) Oauth(ctx context.Context) (*proto.OAuthResponse, error) {
 	redirectURL := a.authService.CreateRedirectURL()
-	return proto.OAuthResponse{
+	return &proto.OAuthResponse{
 		RedirectURL: redirectURL,
 	}, nil
 }
 
-func (a *Auth) Status(ctx context.Context) (proto.AuthStatus, error) {
+func (a *Auth) Status(ctx context.Context) (*proto.AuthStatus, error) {
 	user := rpc.GetUser(ctx)
-	return proto.AuthStatus{
+	return &proto.AuthStatus{
 		Email: user.GoogleEmail,
 	}, nil
 }

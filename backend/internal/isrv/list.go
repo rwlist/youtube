@@ -20,64 +20,64 @@ func NewList(oauthConfig *oauth2.Config, catalog *lists.Catalog) *List {
 	}
 }
 
-func (l *List) Info(ctx context.Context, listID string) (proto.ListInfo, error) {
+func (l *List) Info(ctx context.Context, listID string) (*proto.ListInfo, error) {
 	user := rpc.GetUser(ctx)
 
 	engine, err := l.catalog.GetList(user.ID, listID)
 	if err != nil {
-		return proto.ListInfo{}, err
+		return nil, err
 	}
 
 	info, err := engine.Info()
 	if err != nil {
-		return proto.ListInfo{}, err
+		return nil, err
 	}
 
-	return *info, nil
+	return info, nil
 }
 
-func (l *List) Items(ctx context.Context, listID string) (proto.ListItems, error) {
+func (l *List) Items(ctx context.Context, listID string) (*proto.ListItems, error) {
 	user := rpc.GetUser(ctx)
 
 	engine, err := l.catalog.GetList(user.ID, listID)
 	if err != nil {
-		return proto.ListItems{}, err
+		return nil, err
 	}
 
 	items, err := engine.ListItems()
 	if err != nil {
-		return proto.ListItems{}, err
+		return nil, err
 	}
 
-	return proto.ListItems{
+	return &proto.ListItems{
 		Items: items,
 	}, nil
 }
 
-func (l *List) PageItems(ctx context.Context, req proto.PageRequest) (proto.ListItems, error) {
+func (l *List) PageItems(ctx context.Context, req *proto.PageRequest) (*proto.ListItems, error) {
 	user := rpc.GetUser(ctx)
 
 	engine, err := l.catalog.GetList(user.ID, req.ListID)
 	if err != nil {
-		return proto.ListItems{}, err
+		return nil, err
 	}
 
 	items, err := engine.PageItems(req)
 	if err != nil {
-		return proto.ListItems{}, err
+		return nil, err
 	}
 
-	return proto.ListItems{
+	return &proto.ListItems{
 		Items: items,
 	}, nil
 }
 
-func (l *List) ExecuteQuery(ctx context.Context, query proto.Query) (proto.QueryResponse, error) {
+func (l *List) ExecuteQuery(ctx context.Context, query *proto.Query) (*proto.QueryResponse, error) {
 	user := rpc.GetUser(ctx)
 
 	engine, err := l.catalog.GetList(user.ID, query.ListID)
 	if err != nil {
-		return proto.QueryResponse{}, err
+		return nil, err
 	}
 
 	return engine.ExecuteQuery(query.Query)

@@ -3,7 +3,7 @@ package proto
 //gjrpc:service catalog
 type ListsCatalog interface {
 	//gjrpc:method all
-	All() (AllLists, error)
+	All() (*AllLists, error)
 }
 
 type AllLists struct {

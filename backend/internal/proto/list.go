@@ -14,16 +14,16 @@ const (
 //gjrpc:service list
 type ListService interface {
 	//gjrpc:method info
-	Info(listID string) (ListInfo, error)
+	Info(listID string) (*ListInfo, error)
 
 	//gjrpc:method items
-	Items(listID string) (ListItems, error)
+	Items(listID string) (*ListItems, error)
 
 	//gjrpc:method pageItems
-	PageItems(req PageRequest) (ListItems, error)
+	PageItems(req *PageRequest) (*ListItems, error)
 
 	//gjrpc:method executeQuery
-	ExecuteQuery(query Query) (QueryResponse, error)
+	ExecuteQuery(query *Query) (*QueryResponse, error)
 }
 
 type ListInfo struct {

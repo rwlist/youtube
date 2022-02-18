@@ -8,6 +8,7 @@ import (
 )
 
 // TODO: can storage be a generic interface, supporting different storage backends?
+
 type Storage struct {
 	db      *gorm.DB
 	catalog *models.CatalogList
@@ -43,7 +44,7 @@ func (s *Storage) FindAll(destArr interface{}) error {
 	return s.db.Table(s.catalog.TableName).Order("xord ASC").Find(destArr).Error
 }
 
-func (s *Storage) FindByPageRequest(req proto.PageRequest, destArr interface{}) error {
+func (s *Storage) FindByPageRequest(req *proto.PageRequest, destArr interface{}) error {
 	// TODO: how to make it work faster?
 	return s.db.
 		Table(s.catalog.TableName).

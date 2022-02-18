@@ -3,10 +3,10 @@ package proto
 //gjrpc:service auth
 type Auth interface {
 	//gjrpc:method oauth
-	Oauth() (OAuthResponse, error)
+	Oauth() (*OAuthResponse, error)
 
 	//gjrpc:method status
-	Status() (AuthStatus, error)
+	Status() (*AuthStatus, error)
 }
 
 type OAuthResponse struct {

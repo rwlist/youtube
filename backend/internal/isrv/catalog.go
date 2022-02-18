@@ -20,24 +20,24 @@ func NewListsCatalog(oauthConfig *oauth2.Config, catalog *lists.Catalog) *ListsC
 	}
 }
 
-func (l *ListsCatalog) All(ctx context.Context) (proto.AllLists, error) {
+func (l *ListsCatalog) All(ctx context.Context) (*proto.AllLists, error) {
 	user := rpc.GetUser(ctx)
 
 	engines, err := l.catalog.UserLists(user.ID)
 	if err != nil {
-		return proto.AllLists{}, err
+		return nil, err
 	}
 
 	var infos []proto.ListInfo
 	for _, engine := range engines {
 		info, err := engine.Info()
 		if err != nil {
-			return proto.AllLists{}, err
+			return nil, err
 		}
 		infos = append(infos, *info)
 	}
 
-	return proto.AllLists{
+	return &proto.AllLists{
 		Lists: infos,
 	}, nil
 }

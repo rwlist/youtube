@@ -5,10 +5,10 @@ import "google.golang.org/api/youtube/v3"
 //gjrpc:service youtube
 type Youtube interface {
 	//gjrpc:method playlists
-	Playlists() (Playlists, error)
+	Playlists() (*Playlists, error)
 
 	//gjrpc:method liked
-	Liked() (PlaylistItems, error)
+	Liked() (*PlaylistItems, error)
 }
 
 type Playlists struct {

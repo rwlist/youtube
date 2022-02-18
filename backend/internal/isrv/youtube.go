@@ -24,10 +24,10 @@ func (y *Youtube) api(ctx context.Context) (*youtube.Service, error) {
 	return api, err
 }
 
-func (y *Youtube) Playlists(ctx context.Context) (proto.Playlists, error) {
+func (y *Youtube) Playlists(ctx context.Context) (*proto.Playlists, error) {
 	api, err := y.api(ctx)
 	if err != nil {
-		return proto.Playlists{}, err
+		return nil, err
 	}
 
 	call := api.Playlists.List([]string{"contentDetails", "id", "localizations", "player", "snippet", "status"})
@@ -35,18 +35,18 @@ func (y *Youtube) Playlists(ctx context.Context) (proto.Playlists, error) {
 	//call.Mine(true)
 	resp, err := call.Do()
 	if err != nil {
-		return proto.Playlists{}, err
+		return nil, err
 	}
 
-	return proto.Playlists{
+	return &proto.Playlists{
 		Response: resp,
 	}, nil
 }
 
-func (y *Youtube) Liked(ctx context.Context) (proto.PlaylistItems, error) {
+func (y *Youtube) Liked(ctx context.Context) (*proto.PlaylistItems, error) {
 	api, err := y.api(ctx)
 	if err != nil {
-		return proto.PlaylistItems{}, err
+		return nil, err
 	}
 
 	call := api.PlaylistItems.List([]string{"contentDetails", "id", "snippet", "status"})
@@ -54,10 +54,10 @@ func (y *Youtube) Liked(ctx context.Context) (proto.PlaylistItems, error) {
 	call.MaxResults(50)
 	resp, err := call.Do()
 	if err != nil {
-		return proto.PlaylistItems{}, err
+		return nil, err
 	}
 
-	return proto.PlaylistItems{
+	return &proto.PlaylistItems{
 		Response: resp,
 	}, nil
 }

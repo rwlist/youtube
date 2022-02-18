@@ -7,7 +7,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// TODO: implement real logic later
+// TODO: delete this when everything is done
 
 type ListsFake struct {
 	oauthConfig *oauth2.Config
