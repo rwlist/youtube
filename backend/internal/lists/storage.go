@@ -1,7 +1,8 @@
 package lists
 
 import (
-	"github.com/rwlist/youtube/internal/global"
+	"fmt"
+
 	"github.com/rwlist/youtube/internal/models"
 	"github.com/rwlist/youtube/internal/proto"
 	"gorm.io/gorm"
@@ -10,20 +11,28 @@ import (
 // TODO: can storage be a generic interface, supporting different storage backends?
 
 type Storage struct {
-	db      *gorm.DB
-	catalog *models.CatalogList
+	db             *gorm.DB
+	txInProgress   bool
+	catalog        *models.CatalogList
+	catalogManager *Catalog
 }
 
-func NewStorage(db *gorm.DB, catalog *models.CatalogList) *Storage {
+func NewStorage(db *gorm.DB, catalog *models.CatalogList, c *Catalog) *Storage {
 	return &Storage{
-		db:      db,
-		catalog: catalog,
+		db:             db,
+		catalog:        catalog,
+		catalogManager: c,
 	}
 }
 
 func (s Storage) Transaction(f func(s *Storage) error) error {
+	if s.txInProgress {
+		return fmt.Errorf("storage can't start embedded tx")
+	}
+
 	return s.db.Transaction(func(tx *gorm.DB) error {
 		s.db = tx
+		s.txInProgress = true
 		return f(&s)
 	})
 }
@@ -36,7 +45,7 @@ func (s *Storage) CreateTable(model interface{}) error {
 	return s.db.Table(s.catalog.TableName).Migrator().CreateTable(model)
 }
 
-func (s Storage) Automigrate(model interface{}) error {
+func (s Storage) AutoMigrate(model interface{}) error {
 	return s.db.Table(s.catalog.TableName).Migrator().AutoMigrate(model)
 }
 
@@ -59,12 +68,20 @@ func (s *Storage) FindByPrimaryKey(destArr interface{}, primaryKeys interface{})
 	return s.db.Table(s.catalog.TableName).Find(destArr, primaryKeys).Error
 }
 
-func (s *Storage) FindByYoutubeID(destArr interface{}, ids []string) error {
-	return s.db.Table(s.catalog.TableName).Where("youtube_id IN ?", ids).Find(destArr).Error
-}
-
 func (s *Storage) FirstByKey(dest interface{}, key string, value interface{}) error {
 	return s.db.Table(s.catalog.TableName).Where(key+" = ?", value).Find(dest).Error
+}
+
+func (s *Storage) FindByKeys(destArr interface{}, key string, values interface{}) error {
+	return s.db.Table(s.catalog.TableName).Where(key+" IN ?", values).Find(destArr).Error
+}
+
+func (s *Storage) FirstByObjectID(dest interface{}, value interface{}) error {
+	return s.FirstByKey(dest, s.catalog.Meta.ObjectIDField, value)
+}
+
+func (s *Storage) FindByObjectIDs(destArr interface{}, values interface{}) error {
+	return s.FindByKeys(destArr, s.catalog.Meta.ObjectIDField, values)
 }
 
 func (s *Storage) OrderLimit(res interface{}, xord string, cnt int) error {
@@ -89,12 +106,12 @@ func (s *Storage) CountAll() (int, error) {
 	return int(count), err
 }
 
-func (s *Storage) UpdateCatalog(repo global.CatalogLists, catalog models.CatalogList) error {
-	err := repo.Update(&catalog)
+func (s *Storage) UpdateCatalog(ct models.CatalogList) error {
+	err := s.catalogManager.engineUpdateCatalog(s.db, &ct)
 	if err != nil {
 		return err
 	}
 
-	s.catalog = &catalog
+	s.catalog = &ct
 	return nil
 }

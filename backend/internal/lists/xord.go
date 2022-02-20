@@ -2,6 +2,9 @@ package lists
 
 import "strings"
 
+// TODO: xord will be long if we always insert in the front, how to fix that?
+//		maybe we should take random of two places?
+
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
 const baseLength = 5
 
@@ -10,7 +13,7 @@ func last(s string) uint8 {
 }
 
 func validXord(xord string) bool {
-	if len(xord) == 0 {
+	if xord == "" {
 		return false
 	}
 	if last(xord) == alphabet[0] {
@@ -19,7 +22,11 @@ func validXord(xord string) bool {
 	return true
 }
 
-func splitXord(a, b string) string {
+func splitXord(a, b string) (ret string) {
+	defer func() {
+		println("splitXord", a, b, "=>", ret)
+	}()
+
 	if a == "" && b == "" {
 		return strings.Repeat(string(alphabet[len(alphabet)/2]), baseLength)
 	}
@@ -38,26 +45,8 @@ func splitXord(a, b string) string {
 		panic("a >= b")
 	}
 
-	vals := []uint8(a)
-
-	critical := 0
-	for i := 0; i < len(vals); i++ {
-		if vals[i] == last(alphabet) {
-			critical++
-		} else {
-			break
-		}
-	}
-
-	var c []uint8
-	if critical != len(vals) {
-		c = up1(vals)
-		if string(c) >= b {
-			c = []uint8(a)
-		}
-	} else {
-		c = []uint8(a)
-	}
+	critical := calcCritical(a)
+	c := tryUp1(critical, b, a)
 	newMinLength := 2 * critical
 	if newMinLength < baseLength {
 		newMinLength = baseLength
@@ -98,6 +87,45 @@ func splitXord(a, b string) string {
 	}
 
 	return res
+}
+
+func calcCritical(a string) int {
+	vals := []uint8(a)
+
+	critical := 0
+	for i := 0; i < len(vals); i++ {
+		if vals[i] == last(alphabet) {
+			critical++
+		} else {
+			break
+		}
+	}
+	return critical
+}
+
+func tryUp1(critical int, target string, rollback string) []uint8 {
+	vals := []uint8(rollback)
+
+	// if critical < baseLength && len(vals) > baseLength+1 {
+	//	// try to cut and increase
+	//	vals = vals[:baseLength]
+	//	vals = up1(vals)
+	//
+	//	if string(vals) < target {
+	//		return vals
+	//	}
+	//}
+	// vals = []uint8(rollback)
+
+	if critical != len(vals) {
+		// try to increase last char
+		vals = up1(vals)
+		if string(vals) < target {
+			return vals
+		}
+	}
+
+	return []uint8(rollback)
 }
 
 func up1(vals []uint8) []uint8 {
@@ -142,7 +170,7 @@ func subXord(xord string) []uint8 {
 			if newLength < baseLength {
 				newLength = baseLength
 			}
-			growx8(&vals, 1, baseLength, last(alphabet))
+			growx8(&vals, 1, newLength, last(alphabet))
 		}
 	}
 	return vals
@@ -153,4 +181,12 @@ func growx8(x8 *[]uint8, min int, target int, char uint8) {
 		*x8 = append(*x8, char)
 		min--
 	}
+}
+
+func xordMetric(xords []string) float32 {
+	var ret int
+	for _, xord := range xords {
+		ret += len(xord)
+	}
+	return float32(ret) / float32(len(xords))
 }

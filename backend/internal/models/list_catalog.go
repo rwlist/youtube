@@ -3,9 +3,10 @@ package models
 import (
 	"crypto/rand"
 	"encoding/json"
+	"time"
+
 	"github.com/rwlist/youtube/internal/proto"
 	"gorm.io/gorm"
-	"time"
 )
 
 type CatalogMeta struct {

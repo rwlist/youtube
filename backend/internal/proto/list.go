@@ -77,6 +77,9 @@ type Query struct {
 type QueryResponse struct {
 	Status string
 	Object interface{} `json:",omitempty"`
+
+	// will be closed when operation is fully completed
+	DoneChannel chan struct{} `json:"-"`
 }
 
 type PageRequest struct {

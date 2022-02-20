@@ -49,13 +49,17 @@ func (r *CatalogLists) Create(list *models.CatalogList, txCallback func(*gorm.DB
 	})
 }
 
-func (r *CatalogLists) Update(list *models.CatalogList) error {
+func (r *CatalogLists) Update(tx *gorm.DB, list *models.CatalogList) error {
+	if tx == nil {
+		tx = r.db
+	}
+
 	err := list.BeforeSave()
 	if err != nil {
 		return err
 	}
 
-	return r.db.Save(list).Error
+	return tx.Save(list).Error
 }
 
 func (r *CatalogLists) GetByListID(userID uint, listID string) (*models.CatalogList, error) {

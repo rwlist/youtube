@@ -1,8 +1,9 @@
 package rpc
 
 import (
-	log "github.com/sirupsen/logrus"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const cookieAccessToken = "access_token"

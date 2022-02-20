@@ -1,9 +1,10 @@
 package rpc
 
 import (
+	"strings"
+
 	"github.com/rwlist/gjrpc/pkg/jsonrpc"
 	"github.com/rwlist/youtube/internal/proto"
-	"strings"
 )
 
 func ConvertError(err error) (jsonrpc.Result, *jsonrpc.Error) {

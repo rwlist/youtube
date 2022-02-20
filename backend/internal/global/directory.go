@@ -2,6 +2,7 @@ package global
 
 import (
 	"github.com/rwlist/youtube/internal/models"
+	"gorm.io/gorm"
 )
 
 type LikedSync interface {
@@ -9,7 +10,7 @@ type LikedSync interface {
 }
 
 type CatalogLists interface {
-	Update(list *models.CatalogList) error
+	Update(tx *gorm.DB, list *models.CatalogList) error
 }
 
 type Directory struct {

@@ -20,15 +20,30 @@ linters-settings:
       - octalLiteral
       - whyNoLint
       - wrapperFunc
+      - singleCaseSwitch
+      - hugeParam
+      - paramTypeCombine
   gocyclo:
     min-complexity: 20
   gomnd:
     settings:
       mnd:
-        # don't include the "operation" and "assign"
-        checks: argument,case,condition,return
+        # List of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
+        checks:
+          - argument
+          - case
+          - condition
+          - operation
+          - return
+          - assign
+        # List of numbers to exclude from analysis.
+        # The numbers should be written as string.
+        # Values always ignored: "1", "1.0", "0" and "0.0"
+        ignored-numbers:
+          - '2'
+          - '3'
   govet:
-    check-shadowing: true
+    check-shadowing: false
   lll:
     line-length: 140
   maligned:
@@ -40,6 +55,8 @@ linters-settings:
     allow-unused: false # report any unused nolint directives
     require-explanation: false # don't require an explanation for nolint directives
     require-specific: false # don't require nolint directives to be specific about which linter is being skipped
+  stylecheck:
+    checks: [ "all", "-ST1000", "-ST1003", "-ST1016", "-ST1020", "-ST1021", "-ST1022" ]
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -61,13 +78,13 @@ linters:
     - gocyclo
     - gofmt
     - goimports
-    - gomnd
+    #    - gomnd
     - goprintffuncname
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - lll
+    #    - lll
     - misspell
     - nakedret
     - noctx
@@ -105,6 +122,7 @@ issues:
     - path: _test\.go
       linters:
         - gomnd
+        - gosec
 
 run:
   skip-dirs:

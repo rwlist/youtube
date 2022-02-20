@@ -2,6 +2,7 @@ package isrv
 
 import (
 	"context"
+
 	"github.com/rwlist/youtube/internal/proto"
 	"github.com/rwlist/youtube/internal/rpc"
 	"golang.org/x/oauth2"
@@ -32,7 +33,6 @@ func (y *Youtube) Playlists(ctx context.Context) (*proto.Playlists, error) {
 
 	call := api.Playlists.List([]string{"contentDetails", "id", "localizations", "player", "snippet", "status"})
 	call.Id("LL", "WL")
-	//call.Mine(true)
 	resp, err := call.Do()
 	if err != nil {
 		return nil, err

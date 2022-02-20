@@ -1,6 +1,11 @@
 package main
 
 import (
+	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"os"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rwlist/gjrpc/pkg/gjserver"
@@ -19,15 +24,12 @@ import (
 	"google.golang.org/api/youtube/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"io/ioutil"
-	"net/http"
-	"net/http/httputil"
-	"net/url"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/sirupsen/logrus"
 )
 
+//nolint:funlen
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 	log.SetReportCaller(true)
@@ -47,7 +49,7 @@ func main() {
 		}
 	}()
 
-	b, err := ioutil.ReadFile("client_secret.json")
+	b, err := os.ReadFile("client_secret.json")
 	if err != nil {
 		log.WithError(err).Fatal("unable to read client secret file")
 	}
@@ -63,10 +65,7 @@ func main() {
 	}
 	db = db.Debug()
 
-	err = db.AutoMigrate(
-		&models.User{},
-		&models.CatalogList{},
-	)
+	err = models.AutoMigrate(db)
 	if err != nil {
 		log.WithError(err).Fatal("failed to migrate tables")
 	}
@@ -74,8 +73,10 @@ func main() {
 	usersRepo := repos.NewUsers(db)
 	catalogsRepo := repos.NewCatalogLists(db)
 
+	youtubeLikesCursor := ytsync.NewLikesCursor(oauthConfig, usersRepo)
+
 	globalDir := &global.Directory{
-		LikedSync:    ytsync.NewLikedSync(oauthConfig, usersRepo),
+		LikedSync:    ytsync.NewLikedSync(youtubeLikesCursor),
 		CatalogsRepo: catalogsRepo,
 	}
 
@@ -95,7 +96,7 @@ func main() {
 	rpcHandler = rpc.AuthMiddleware(authService, []string{"auth.oauth"})(rpcHandler)
 	rpcHandler = rpc.LogMiddleware()(rpcHandler)
 
-	httpHandler := &gjserver.HandlerHTTP{rpcHandler} // TODO: add constructor?
+	httpHandler := &gjserver.HandlerHTTP{Handler: rpcHandler} // TODO: add constructor?
 
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)

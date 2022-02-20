@@ -2,6 +2,7 @@ package lists
 
 import (
 	"fmt"
+
 	"github.com/rwlist/youtube/internal/global"
 	"github.com/rwlist/youtube/internal/models"
 	"github.com/rwlist/youtube/internal/proto"
@@ -72,8 +73,8 @@ func (c *Catalog) UserLists(userID uint) ([]Engine, error) {
 	}
 
 	lists := make([]Engine, len(res))
-	for i, l := range res {
-		lists[i], err = c.buildEngine(c.defaultDB, &l)
+	for i := range res {
+		lists[i], err = c.buildEngine(c.defaultDB, &res[i])
 		if err != nil {
 			return nil, err
 		}
@@ -91,10 +92,14 @@ func (c *Catalog) GetList(userID uint, listID string) (Engine, error) {
 }
 
 func (c *Catalog) buildEngine(db *gorm.DB, list *models.CatalogList) (Engine, error) {
-	storage := NewStorage(db, list)
+	storage := NewStorage(db, list, c)
 	if list.ListType == proto.ListTypeExternal && list.ListID == listLiked {
 		return NewLikedEngine(storage, c.dir), nil
 	}
 
 	return nil, fmt.Errorf("list %s not supported, list type: %s", list.ListID, list.ListType)
+}
+
+func (c *Catalog) engineUpdateCatalog(tx *gorm.DB, ct *models.CatalogList) error {
+	return c.repo.Update(tx, ct)
 }

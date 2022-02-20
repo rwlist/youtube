@@ -1,9 +1,10 @@
 package models
 
 import (
+	"time"
+
 	"github.com/rwlist/youtube/internal/proto"
 	"google.golang.org/api/youtube/v3"
-	"time"
 )
 
 // Model is generic header for all objects in the list. Should be embedded in user structs.
@@ -78,4 +79,20 @@ func FromYoutubeItem(item *youtube.PlaylistItem) (*YoutubeData, error) {
 		ChannelID:   item.Snippet.VideoOwnerChannelId,
 		PublishedAt: &publishedAt,
 	}, nil
+}
+
+func ToYoutubeItem(data *YoutubeData) *youtube.PlaylistItem {
+	publishedAt, _ := data.PublishedAt.MarshalText()
+
+	return &youtube.PlaylistItem{
+		ContentDetails: &youtube.PlaylistItemContentDetails{
+			VideoId: data.YoutubeID,
+		},
+		Snippet: &youtube.PlaylistItemSnippet{
+			Title:                  data.Title,
+			VideoOwnerChannelTitle: data.Author,
+			VideoOwnerChannelId:    data.ChannelID,
+			PublishedAt:            string(publishedAt),
+		},
+	}
 }
