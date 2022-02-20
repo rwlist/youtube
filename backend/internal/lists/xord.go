@@ -104,18 +104,20 @@ func calcCritical(a string) int {
 }
 
 func tryUp1(critical int, target string, rollback string) []uint8 {
+	const enableLargeIncrement = false
+
 	vals := []uint8(rollback)
 
-	// if critical < baseLength && len(vals) > baseLength+1 {
-	//	// try to cut and increase
-	//	vals = vals[:baseLength]
-	//	vals = up1(vals)
-	//
-	//	if string(vals) < target {
-	//		return vals
-	//	}
-	//}
-	// vals = []uint8(rollback)
+	if enableLargeIncrement && critical < baseLength && len(vals) > baseLength+1 {
+		// try to cut and increase
+		vals = vals[:baseLength]
+		vals = up1(vals)
+
+		if string(vals) < target {
+			return vals
+		}
+		vals = []uint8(rollback)
+	}
 
 	if critical != len(vals) {
 		// try to increase last char

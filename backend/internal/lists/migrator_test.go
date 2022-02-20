@@ -3,6 +3,7 @@ package lists
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -20,7 +21,16 @@ type databaseMigrator struct {
 }
 
 func newDatabaseMigrator(t *testing.T, connstr string) *databaseMigrator {
-	db, err := gorm.Open(postgres.Open(connstr), &gorm.Config{})
+	var db *gorm.DB
+	var err error
+
+	for retry := 0; retry < 10; retry++ {
+		db, err = gorm.Open(postgres.Open(connstr), &gorm.Config{})
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
 	if err != nil {
 		t.Fatal("failed to connect to postgres", err)
 	}

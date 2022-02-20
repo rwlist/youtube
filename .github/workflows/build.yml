@@ -42,5 +42,12 @@ jobs:
       - name: Go Build
         run: go build -v ./...
 
+      - name: Start postgres
+        run: docker-compose up -d
+        env:
+          POSTGRES_PASSWORD: postgres
+
       - name: Go Test
         run: go test -v -race -shuffle=on -coverprofile=coverage.txt ./...
+        env:
+          TEST_CONNSTR: "host=localhost port=5432 user=postgres password=postgres dbname=postgres"

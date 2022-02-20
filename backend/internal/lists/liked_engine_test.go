@@ -106,6 +106,7 @@ func dumpLists(t *testing.T, x *testContext) {
 	}
 }
 
+//nolint:unparam
 func fetchVerify(t *testing.T, liked *LikedEngine, youtubeItems []models.YoutubeData) (arr []models.LikedModel, xords []string) {
 	items, err := liked.ListItemsTyped()
 	assert.NoError(t, err)
